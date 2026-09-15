@@ -1,0 +1,56 @@
+services:
+  - type: web
+    name: school-transport
+    runtime: python
+    rootDir: school_transport
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    healthCheckPath: /login
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+
+  - type: web
+    name: school-notifications
+    runtime: python
+    rootDir: notifications
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    healthCheckPath: /login
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+
+  - type: web
+    name: school-academics
+    runtime: node
+    rootDir: academics/backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+
+  - type: web
+    name: school-fee-api
+    runtime: node
+    rootDir: fee finance/backend
+    buildCommand: npm install && npm run prisma:generate && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+
+  - type: static
+    name: school-fee-frontend
+    rootDir: fee finance/frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false

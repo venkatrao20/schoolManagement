@@ -51,6 +51,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await api.post('/auth/login', { email, password });
     const { accessToken, refreshToken, user: userData } = res.data;
 
+    if (!accessToken || !refreshToken || !userData) {
+      throw new Error('The SchoolConnect API is not connected to this frontend.');
+    }
+
     localStorage.setItem('schoolconnect_token', accessToken);
     localStorage.setItem('schoolconnect_refresh_token', refreshToken);
     localStorage.setItem('schoolconnect_user', JSON.stringify(userData));

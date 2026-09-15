@@ -27,7 +27,7 @@ export const Login: React.FC = () => {
       showToast('Welcome back! Signed in successfully.');
       navigate('/dashboard');
     } catch (err: any) {
-      const msg = err.response?.data?.error?.message || 'Failed to sign in. Check credentials.';
+      const msg = err.response?.data?.error?.message || err.message || 'Failed to sign in. Check credentials.';
       showToast(msg, 'error');
     } finally {
       setIsLoading(false);

@@ -19,6 +19,21 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const demoMode = import.meta.env.VITE_DEMO_MODE === 'true';
+const demoUsers: Record<string, { password: string; user: User }> = {
+  'superadmin@schoolconnect.edu': {
+    password: 'Admin@123',
+    user: { id: 'demo-superadmin', name: 'Demo SuperAdmin', email: 'superadmin@schoolconnect.edu', role: 'SUPER_ADMIN', isActive: true, createdAt: '2026-01-01T00:00:00.000Z' },
+  },
+  'admin@schoolconnect.edu': {
+    password: 'Admin@123',
+    user: { id: 'demo-admin', name: 'Demo Admin', email: 'admin@schoolconnect.edu', role: 'ADMIN', isActive: true, createdAt: '2026-01-01T00:00:00.000Z' },
+  },
+  'staff@schoolconnect.edu': {
+    password: 'Staff@123',
+    user: { id: 'demo-staff', name: 'Demo Staff', email: 'staff@schoolconnect.edu', role: 'STAFF', isActive: true, createdAt: '2026-01-01T00:00:00.000Z' },
+  },
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
@@ -48,6 +63,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
+    if (demoMode) {
+      const demoAccount = demoUsers[email.toLowerCase()];
+      if (!demoAccount || demoAccount.password !== password) {
+        throw new Error('Use one of the demo accounts shown below.');
+      }
+      const demoToken = `demo-token-${demoAccount.user.id}`;
+      localStorage.setItem('schoolconnect_token', demoToken);
+      localStorage.setItem('schoolconnect_refresh_token', demoToken);
+      localStorage.setItem('schoolconnect_user', JSON.stringify(demoAccount.user));
+      setToken(demoToken);
+      setUser(demoAccount.user);
+      return;
+    }
+
     const res = await api.post('/auth/login', { email, password });
     const { accessToken, refreshToken, user: userData } = res.data;
 

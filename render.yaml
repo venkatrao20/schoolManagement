@@ -5,3 +5,6 @@ services:
     rootDir: fee finance/frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+    envVars:
+      - key: VITE_DEMO_MODE
+        value: "true"

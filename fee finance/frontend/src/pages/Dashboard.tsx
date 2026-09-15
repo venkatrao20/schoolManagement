@@ -21,6 +21,16 @@ export const Dashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      setStats({
+        metrics: { totalStudents: 128, enrolledStudents: 112, totalParents: 96, pendingAdmissions: 9, approvedAdmissions: 17 },
+        recentAdmissions: [],
+        charts: { gradeDistribution: [{ grade: 'Grade 1', count: 28 }, { grade: 'Grade 2', count: 24 }, { grade: 'Grade 3', count: 22 }, { grade: 'Grade 4', count: 20 }] },
+      });
+      setIsLoading(false);
+      return;
+    }
+
     async function fetchDashboard() {
       try {
         const res = await api.get('/dashboard/stats');

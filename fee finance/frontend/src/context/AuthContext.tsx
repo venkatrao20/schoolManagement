@@ -35,10 +35,20 @@ const demoUsers: Record<string, { password: string; user: User }> = {
   },
 };
 
+function readStoredUser(): User | null {
+  const saved = localStorage.getItem('schoolconnect_user');
+  if (!saved || saved === 'undefined' || saved === 'null') return null;
+  try {
+    return JSON.parse(saved);
+  } catch {
+    localStorage.removeItem('schoolconnect_user');
+    return null;
+  }
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('schoolconnect_user');
-    return saved ? JSON.parse(saved) : null;
+    return readStoredUser();
   });
   const [token, setToken] = useState<string | null>(() => {
     return localStorage.getItem('schoolconnect_token');

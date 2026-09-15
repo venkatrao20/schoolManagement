@@ -2,7 +2,6 @@ services:
   - type: web
     name: school-transport
     runtime: python
-    plan: free
     rootDir: school_transport
     buildCommand: pip install -r requirements.txt
     startCommand: python app.py
@@ -14,7 +13,6 @@ services:
   - type: web
     name: school-notifications
     runtime: python
-    plan: free
     rootDir: notifications
     buildCommand: pip install -r requirements.txt
     startCommand: python app.py
@@ -26,7 +24,6 @@ services:
   - type: web
     name: school-academics
     runtime: node
-    plan: free
     rootDir: academics/backend
     buildCommand: npm install
     startCommand: npm start
@@ -35,7 +32,6 @@ services:
   - type: web
     name: school-fee-api
     runtime: node
-    plan: free
     rootDir: fee finance/backend
     buildCommand: npm install && npm run prisma:generate && npm run build
     startCommand: npm start
@@ -53,7 +49,6 @@ services:
   - type: web
     name: school-fee-frontend
     runtime: static
-    plan: free
     rootDir: fee finance/frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist

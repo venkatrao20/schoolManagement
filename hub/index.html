@@ -60,12 +60,12 @@
     <div class="brand"><img class="brand-logo" src="edunovae-logo.svg" alt="EduNovae, powered by RSR Technologies"></div>
     <nav aria-label="Modules">
       <a class="active" href="/">🏠 Hub Overview</a>
-      <a href="http://127.0.0.1:5174">🎓 Admin Portal</a>
-      <a href="http://127.0.0.1:5002">🚌 Transport</a>
-      <a href="http://127.0.0.1:3001">📄 Admissions</a>
-      <a href="http://127.0.0.1:4000">📚 Academics</a>
-      <a href="http://127.0.0.1:5001">🔔 Notifications</a>
-      <a href="http://127.0.0.1:5173">💳 Fee Finance</a>
+      <a href="#admin">🎓 Admin Portal</a>
+      <a href="#transport">🚌 Transport</a>
+      <a href="#admissions">📄 Admissions</a>
+      <a href="#academics">📚 Academics</a>
+      <a href="#notifications">🔔 Notifications</a>
+      <a href="https://school-fee-frontend.onrender.com/">💳 Fee Finance</a>
     </nav>
     <div class="status" id="hub-status">Checking services…</div>
   </header>
@@ -76,12 +76,12 @@
     </section>
     <div class="section-heading"><h2>📦 School modules</h2><span>Click any module to open it in a new workspace tab.</span></div>
     <section class="grid">
-      <article class="card"><div class="card-top"><div class="icon">🎓</div><span class="service-state" data-status="admin">Offline · 5174</span></div><h3>Admin Portal</h3><p>School information, classes, sections, students, staff, timetable, marks and CSV uploads.</p><a class="open" href="http://127.0.0.1:5174">Open Admin Portal →</a></article>
-      <article class="card"><div class="card-top"><div class="icon">🚌</div><span class="service-state" data-status="transport">Offline · 5002</span></div><h3>School Transport</h3><p>Bus routes, vehicles, driver management, assignments and live boarding tracking.</p><a class="open" href="http://127.0.0.1:5002">Open Transport →</a></article>
-      <article class="card"><div class="card-top"><div class="icon">📄</div><span class="service-state" data-status="admissions">Offline · 3001</span></div><h3>Admissions</h3><p>Student enquiries, applications, assessments, approvals and admission metrics.</p><a class="open" href="http://127.0.0.1:3001">Open Admissions →</a></article>
-      <article class="card"><div class="card-top"><div class="icon">📚</div><span class="service-state" data-status="academics">Offline · 4000</span></div><h3>Academics</h3><p>Teacher assignments, attendance, homework, exams and student report cards.</p><a class="open" href="http://127.0.0.1:4000">Open Academics →</a></article>
-      <article class="card"><div class="card-top"><div class="icon">🔔</div><span class="service-state" data-status="notifications">Offline · 5001</span></div><h3>Notifications</h3><p>Fees, events, attendance alerts, reports and role-based school notifications.</p><a class="open" href="http://127.0.0.1:5001">Open Notifications →</a></article>
-      <article class="card"><div class="card-top"><div class="icon">💳</div><span class="service-state" data-status="fees">Offline · 5173</span></div><h3>Fee Finance</h3><p>Fee structures, payment plans, discounts, student assignments and finance summaries.</p><a class="open" href="http://127.0.0.1:5173">Open Fee Finance →</a></article>
+      <article id="admin" class="card"><div class="card-top"><div class="icon">🎓</div><span class="service-state" data-status="admin">Offline · 5174</span></div><h3>Admin Portal</h3><p>School information, classes, sections, students, staff, timetable, marks and CSV uploads.</p><a class="open" href="#admin">Available in local development</a></article>
+      <article id="transport" class="card"><div class="card-top"><div class="icon">🚌</div><span class="service-state" data-status="transport">Offline · 5002</span></div><h3>School Transport</h3><p>Bus routes, vehicles, driver management, assignments and live boarding tracking.</p><a class="open" href="#transport">Available in local development</a></article>
+      <article id="admissions" class="card"><div class="card-top"><div class="icon">📄</div><span class="service-state" data-status="admissions">Offline · 3001</span></div><h3>Admissions</h3><p>Student enquiries, applications, assessments, approvals and admission metrics.</p><a class="open" href="#admissions">Available in local development</a></article>
+      <article id="academics" class="card"><div class="card-top"><div class="icon">📚</div><span class="service-state" data-status="academics">Offline · 4000</span></div><h3>Academics</h3><p>Teacher assignments, attendance, homework, exams and student report cards.</p><a class="open" href="#academics">Available in local development</a></article>
+      <article id="notifications" class="card"><div class="card-top"><div class="icon">🔔</div><span class="service-state" data-status="notifications">Offline · 5001</span></div><h3>Notifications</h3><p>Fees, events, attendance alerts, reports and role-based school notifications.</p><a class="open" href="#notifications">Available in local development</a></article>
+      <article class="card"><div class="card-top"><div class="icon">💳</div><span class="service-state online" data-status="fees">Online · Render</span></div><h3>Fee Finance</h3><p>Fee structures, payment plans, discounts, student assignments and finance summaries.</p><a class="open" href="https://school-fee-frontend.onrender.com/">Open Fee Finance →</a></article>
     </section>
     <div class="section-heading"><h2>Start the Hub</h2><span>The launcher keeps all module processes in one terminal.</span></div>
     <section class="launch"><div><strong>From the repository root:</strong><span class="hint">The dashboard is then available at <code>http://127.0.0.1:8080</code>.</span></div><code>cd hub &amp;&amp; npm run start:all</code></section>
@@ -110,7 +110,8 @@
           badge.classList.toggle('online', module.online);
         });
       } catch {
-        status.textContent = '● Hub status unavailable';
+        count.textContent = '1/6';
+        status.textContent = '● Hub online · backend modules offline';
       }
     }
     refreshStatus();

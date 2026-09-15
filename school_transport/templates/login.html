@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Sign in — SchoolSafe{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/portal-login.css') }}">
+{% endblock %}
+{% block content %}
+<div class="portal">
+    <div class="portal-frame">
+        <!-- Branding panel -->
+        <div class="portal-brand">
+            <div class="portal-brand-top">
+                <div class="seal" aria-hidden="true">
+                    <svg viewBox="0 0 100 100" class="seal-svg">
+                        <circle cx="50" cy="50" r="47" class="seal-ring-outer" />
+                        <circle cx="50" cy="50" r="38" class="seal-ring-inner" />
+                        <text x="50" y="58" text-anchor="middle" class="seal-mark">SS</text>
+                    </svg>
+                </div>
+                <span class="portal-eyebrow">Access Portal</span>
+            </div>
+
+            <div class="portal-brand-body">
+                <h1 class="portal-title">SchoolSafe<br>Transport Portal</h1>
+                <p class="portal-tagline">Transport &amp; student safety management &mdash; one login, every activity assigned to your role.</p>
+            </div>
+
+            <dl class="portal-meta">
+                <div class="portal-meta-row">
+                    <dt>Status</dt>
+                    <dd><span class="status-dot"></span> Systems operational</dd>
+                </div>
+                <div class="portal-meta-row">
+                    <dt>Session</dt>
+                    <dd>Role&#8209;scoped access</dd>
+                </div>
+            </dl>
+        </div>
+
+        <!-- Form panel -->
+        <div class="portal-form-panel">
+            <div class="portal-form-card">
+                <span class="form-kicker">Sign in</span>
+                <h2 class="form-heading">Welcome back</h2>
+                <p class="form-subheading">Use your assigned credentials to continue.</p>
+
+                <form method="POST" action="{{ url_for('login_page') }}">
+                    <div class="field-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Enter username" required autocomplete="username">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter password" required autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" class="submit-btn">Sign in</button>
+                </form>
+
+                <div class="demo-box">
+                    <h3>Demo Accounts</h3>
+                    <p><strong>Admin:</strong> admin / admin123</p>
+                    <p><strong>Driver:</strong> driver1 / driver123</p>
+                    <p><strong>Parent:</strong> parent1 / parent123</p>
+                </div>
+
+                <p class="form-footnote">Trouble signing in? Contact your system administrator.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

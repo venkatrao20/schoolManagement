@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 330" role="img" aria-labelledby="title desc">
+  <title id="title">EduNovae</title>
+  <desc id="desc">EduNovae, one platform smarter management, powered by RSR Technologies</desc>
+  <rect width="260" height="330" rx="18" fill="#ffffff"/>
+  <g transform="translate(54 15)">
+    <path d="M60 8 112 28 91 43 76 39 49 54 34 46Z" fill="#102a52"/>
+    <path d="M38 47c17-13 43-14 65-6l-16 12c-18-5-32-1-45 8Z" fill="#0d2850"/>
+    <path d="M35 69c14-10 32-13 51-8l-15 14c-13-2-24 2-35 10Z" fill="#087f87"/>
+    <path d="M97 35c-1 28-17 51-42 67 23-4 43-20 53-44l10-28Z" fill="#e4a51b"/>
+    <circle cx="83" cy="69" r="9" fill="#087f87"/>
+    <path d="M16 112c28-9 56-8 84 0-29 4-56 4-84 0Zm8 9c25-4 51-3 75 2-27 3-51 2-75-2Z" fill="#102a52"/>
+    <path d="M15 111c28-10 57-10 88 0l-7 4c-27-7-52-7-78 1Z" fill="#e4a51b"/>
+  </g>
+  <text x="130" y="177" text-anchor="middle" fill="#102a52" font-family="Georgia, serif" font-size="31" font-weight="700" letter-spacing="1">EDUNOVAE</text>
+  <text x="130" y="201" text-anchor="middle" fill="#087f87" font-family="Arial, sans-serif" font-size="9.5" letter-spacing="1">ONE PLATFORM. SMARTER MANAGEMENT.</text>
+  <path d="M35 216h190" stroke="#d5d9e0" stroke-width="1"/>
+  <text x="130" y="241" text-anchor="middle" fill="#17213b" font-family="Arial, sans-serif" font-size="12">Powered by</text>
+  <text x="130" y="269" text-anchor="middle" fill="#102a52" font-family="Arial, sans-serif" font-size="27" font-weight="700">RSR</text>
+  <text x="130" y="289" text-anchor="middle" fill="#17213b" font-family="Arial, sans-serif" font-size="10">TECHNOLOGIES</text>
+</svg>

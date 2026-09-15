@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicles - SchoolSafe{% if edit_vehicle %}
+<script>
+    // Keep the existing edit form visible at the top when Edit is opened.
+    window.addEventListener('load', function () {
+        var form = document.getElementById('vehicle-form');
+        if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #2F6F5E 0%, #12172B 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    }
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+    }
+    .add-section {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        margin-bottom: 24px;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .form-field {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-field label {
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .form-field input,
+    .form-field select {
+        padding: 10px 12px;
+        border: 1px solid #E7DDC5;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+    .btn-save {
+        padding: 12px 24px;
+        background: #2F6F5E;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    .btn-save:hover { background: #275C4E; }
+    .table-section {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        overflow-x: auto;
+    }
+    .table-section table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .table-section th,
+    .table-section td {
+        padding: 12px 14px;
+        text-align: left;
+        border-bottom: 1px solid #E7DDC5;
+    }
+    .table-section th {
+        background: #FFFDF8;
+        font-weight: 600;
+        color: #12172B;
+    }
+    .table-section tr:hover {
+        background: #FFFDF8;
+    }
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .status-active {
+        background: #DCEFE3;
+        color: #256844;
+    }
+    .status-maintenance {
+        background: #FBECD2;
+        color: #8A5A12;
+    }
+    .status-inactive {
+        background: #F6E4E0;
+        color: #A23B3B;
+    }
+    .no-records {
+        text-align: center;
+        padding: 40px;
+        color: #A2A8C4;
+    }
+    .action-cell {
+        white-space: nowrap;
+        min-width: 150px;
+    }
+    .gps-live { color: #256844; font-weight: 700; }
+    .gps-offline { color: #8B8477; }
+    .btn-track {
+        display: inline-block;
+        margin-left: 10px;
+        padding: 7px 11px;
+        border-radius: 7px;
+        background: #12172B;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    .btn-track:hover { background: #2F6F5E; color: #fff; }
+    @media (max-width: 768px) {
+        .form-grid { grid-template-columns: 1fr; }
+        .table-section { overflow-x: auto; }
+    }
+</style>
+
+<div class="page-header">
+    <h1>🚐 Vehicle Management</h1>
+</div>
+
+<div class="add-section" id="vehicle-form">
+    <h3 style="margin-top: 0;">{% if edit_vehicle %}✏️ Edit Vehicle{% else %}➕ Add New Vehicle{% endif %}</h3>
+    <form method="POST" action="{% if edit_vehicle %}{{ url_for('edit_vehicle', vehicle_id=edit_vehicle.id) }}{% else %}{{ url_for('vehicles') }}{% endif %}">
+        <div class="form-grid">
+            <div class="form-field"><label>Vehicle ID</label><input type="text" name="vehicle_id" value="{{ edit_vehicle.vehicle_id if edit_vehicle else '' }}" required></div>
+            <div class="form-field"><label>Vehicle Number</label><input type="text" name="vehicle_number" value="{{ edit_vehicle.vehicle_number if edit_vehicle else '' }}" placeholder="e.g., MH12AB2021" required></div>
+            <div class="form-field"><label>Vehicle Type</label><input type="text" name="vehicle_type" value="{{ edit_vehicle.vehicle_type if edit_vehicle else '' }}" placeholder="e.g., Bus, Minibus" required></div>
+            <div class="form-field"><label>Capacity</label><input type="number" name="capacity" value="{{ edit_vehicle.capacity if edit_vehicle else '' }}" min="1" placeholder="e.g., 50" required></div>
+            <div class="form-field">
+                <label>Assigned Driver</label>
+                <select name="driver_id">
+                    <option value="">-- Select Driver --</option>
+                    {% for driver in drivers %}
+                    <option value="{{ driver.id }}" {% if edit_vehicle and edit_vehicle.driver_id == driver.id %}selected{% endif %}>{{ driver.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-field">
+                <label>Assigned Route</label>
+                <select name="route_id">
+                    <option value="">-- Select Route --</option>
+                    {% for route in routes %}
+                    <option value="{{ route.id }}" {% if edit_vehicle and edit_vehicle.route_id == route.id %}selected{% endif %}>{{ route.route_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-field">
+                <label>Status</label>
+                <select name="status">
+                    <option value="active" {% if edit_vehicle and edit_vehicle.status == 'active' %}selected{% endif %}>🟢 Active</option>
+                    <option value="maintenance" {% if edit_vehicle and edit_vehicle.status == 'maintenance' %}selected{% endif %}>🟡 Maintenance</option>
+                    <option value="inactive" {% if edit_vehicle and edit_vehicle.status == 'inactive' %}selected{% endif %}>🔴 Inactive</option>
+                </select>
+            </div>
+            <div class="form-field"><label>Fitness Certificate Expiry</label><input type="date" name="fitness_expiry" value="{{ edit_vehicle.fitness_expiry if edit_vehicle and edit_vehicle.fitness_expiry else '' }}"></div>
+            <div class="form-field"><label>Pollution Certificate Expiry</label><input type="date" name="pollution_expiry" value="{{ edit_vehicle.pollution_expiry if edit_vehicle and edit_vehicle.pollution_expiry else '' }}"></div>
+            <div class="form-field" style="justify-content:center;"><label><input type="checkbox" name="gps_enabled" {% if edit_vehicle and edit_vehicle.gps_enabled %}checked{% endif %}> GPS Tracking Enabled</label><small style="color:#8B8477;">Optional — schools without GPS can keep using Boarded/Dropped Off.</small></div>
+        </div>
+        <button type="submit" class="btn-save">{% if edit_vehicle %}💾 Update Vehicle{% else %}💾 Save Vehicle{% endif %}</button>{% if edit_vehicle %} <a href="{{ url_for('vehicles') }}" style="margin-left:10px;">Cancel</a>{% endif %}
+    </form>
+</div>
+
+<div class="table-section">
+    <h3 style="margin-top: 0;">📋 Vehicle List</h3>
+    {% if vehicles %}
+    <table>
+        <thead>
+            <tr>
+                <th>Vehicle ID</th>
+                <th>Number</th>
+                <th>Type</th>
+                <th>Capacity</th>
+                <th>Driver</th>
+                <th>Route</th>
+                <th>Status</th>
+                <th>GPS</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vehicle in vehicles %}
+            <tr>
+                <td><strong>{{ vehicle.vehicle_id }}</strong></td>
+                <td>{{ vehicle.vehicle_number }}</td>
+                <td>{{ vehicle.vehicle_type }}</td>
+                <td>{{ vehicle.capacity }} seats</td>
+                <td>{{ vehicle.driver_name or '—' }}</td>
+                <td>{{ vehicle.route_name or '—' }}</td>
+                <td>
+                    {% if vehicle.status == 'active' %}
+                        <span class="status-badge status-active">✓ Active</span>
+                    {% elif vehicle.status == 'maintenance' %}
+                        <span class="status-badge status-maintenance">⚙️ Maintenance</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">✗ Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if vehicle.gps_enabled %}
+                        <span class="{% if vehicle.gps_tracking_status == 'live' %}gps-live{% else %}gps-offline{% endif %}">
+                            📍 {{ vehicle.gps_tracking_status|title }}
+                        </span>
+                    {% else %}
+                        <span class="gps-offline">— Disabled</span>
+                    {% endif %}
+                </td>
+                <td class="action-cell">
+                    <a href="{{ url_for('edit_vehicle', vehicle_id=vehicle.id) }}">✏️ Edit</a>
+                    {% if vehicle.gps_enabled %}
+                    <a class="btn-track" href="{{ url_for('track_vehicle', vehicle_id=vehicle.id) }}">📍 Track</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-records">
+        <p>No vehicles in the system yet. Add one to get started!</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

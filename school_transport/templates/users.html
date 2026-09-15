@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Admin</p>
+        <h1>Manage Authorized Access</h1>
+    </div>
+</div>
+
+<div class="form-card">
+    <h2>Add User</h2>
+    <form method="POST" action="{{ url_for('users') }}">
+        <div class="form-grid">
+            <div><label>Username</label><input type="text" name="username" required></div>
+            <div><label>Password</label><input type="password" name="password" required></div>
+            <div><label>Full Name</label><input type="text" name="name" required></div>
+            <div><label>Role</label>
+                <select name="role" required>
+                    <option value="admin">Admin</option>
+                    <option value="driver">Driver</option>
+                    <option value="parent">Parent</option>
+                </select>
+            </div>
+            <div><label>Driver</label>
+                <select name="driver_id">
+                    <option value="">-- Select Driver --</option>
+                    {% for driver in drivers %}
+                    <option value="{{ driver.id }}">{{ driver.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div><label>Linked Children</label>
+                <select name="parent_student_ids" multiple size="6">
+                    {% for student in students %}
+                    <option value="{{ student.id }}">{{ student.name }} ({{ student.student_id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <button class="primary-btn" type="submit">Create User</button>
+    </form>
+</div>
+
+<div class="table-card">
+    <h2>Users</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Driver</th>
+                <th>Linked Children</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user_record in users %}
+            <tr>
+                <td>{{ user_record.username }}</td>
+                <td>{{ user_record.name }}</td>
+                <td>{{ user_record.role }}</td>
+                <td>{{ user_record.driver_id or '-' }}</td>
+                <td>
+                    {% if user_record.role == 'parent' and parent_links.get(user_record.id) %}
+                        {{ parent_links[user_record.id] | map(attribute='name') | join(', ') }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5">No users found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

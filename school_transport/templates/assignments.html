@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if edit_assignment %}Edit Transport Assignment{% else %}Transport Assignment{% endif %}s - SchoolSafe{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #2F6F5E 0%, #12172B 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    }
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+    }
+    .add-section {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        margin-bottom: 24px;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .form-field {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-field label {
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .form-field input,
+    .form-field select {
+        padding: 10px 12px;
+        border: 1px solid #E7DDC5;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+    .btn-save {
+        padding: 12px 24px;
+        background: #2F6F5E;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    .btn-save:hover { background: #275C4E; }
+    .table-section {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        overflow-x: auto;
+    }
+    .table-section table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .table-section th,
+    .table-section td {
+        padding: 12px 14px;
+        text-align: left;
+        border-bottom: 1px solid #E7DDC5;
+    }
+    .table-section th {
+        background: #FFFDF8;
+        font-weight: 600;
+        color: #12172B;
+    }
+    .table-section tr:hover {
+        background: #FFFDF8;
+    }
+    .date-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        background: #E3EFE9;
+        color: #1B2140;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .no-records {
+        text-align: center;
+        padding: 40px;
+        color: #A2A8C4;
+    }
+    @media (max-width: 768px) {
+        .form-grid { grid-template-columns: 1fr; }
+        .table-section { overflow-x: auto; }
+    }
+</style>
+
+<div class="page-header">
+    <h1>📋 Transport Assignments</h1>
+</div>
+
+<div class="add-section">
+    <h3 style="margin-top: 0;">{% if edit_assignment %}✏️ Edit Transport Assignment{% else %}➕ Create New Assignment{% endif %}</h3>
+    <form method="POST" action="{{ url_for('assignments') }}">
+        {% if edit_assignment %}<input type="hidden" name="assignment_id" value="{{ edit_assignment.id }}">{% endif %}
+        <div class="form-grid">
+            <div class="form-field">
+                <label>Student</label>
+                <select name="student_id" required>
+                    <option value="">-- Select Student --</option>
+                    {% for student in students %}
+                    <option value="{{ student.id }}" {% if edit_assignment and edit_assignment.student_id == student.id %}selected{% endif %}>{{ student.name }} ({{ student.student_id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-field">
+                <label>Vehicle</label>
+                <select name="vehicle_id" required>
+                    <option value="">-- Select Vehicle --</option>
+                    {% for vehicle in vehicles %}
+                    <option value="{{ vehicle.id }}" {% if edit_assignment and edit_assignment.vehicle_id == vehicle.id %}selected{% endif %}>{{ vehicle.vehicle_number }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-field">
+                <label>Route</label>
+                <select name="route_id" required>
+                    <option value="">-- Select Route --</option>
+                    {% for route in routes %}
+                    <option value="{{ route.id }}" {% if edit_assignment and edit_assignment.route_id == route.id %}selected{% endif %}>{{ route.route_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-field">
+                <label>Assignment Date</label>
+                <input type="date" name="assigned_date" value="{{ edit_assignment.assigned_date if edit_assignment else today }}" required>
+            </div>
+        </div>
+        <button type="submit" class="btn-save">{% if edit_assignment %}💾 Update Assignment{% else %}✅ Assign Student{% endif %}</button>{% if edit_assignment %} <a href="{{ url_for('assignments') }}" style="margin-left:10px;">Cancel</a>{% endif %}
+    </form>
+</div>
+
+<div class="table-section">
+    <h3 style="margin-top: 0;">📊 Current Assignments</h3>
+    {% if assignments %}
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Student ID</th>
+                <th>Vehicle</th>
+                <th>Route [Boarding Location]</th>
+                <th>Assigned Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for assignment in assignments %}
+            <tr>
+                <td><strong>{{ assignment.student_name }}</strong></td>
+                <td style="font-size: 0.9rem; color: #8B8477;">{{ assignment.student_id }}</td>
+                <td>🚐 {{ assignment.vehicle_number }}</td>
+                <td>🗺️ {{ route_with_boarding_location(assignment.route_name, assignment.pickup_point) }}</td>
+                <td><span class="date-badge">{{ assignment.assigned_date }}</span></td>
+                <td><a href="{{ url_for('edit_assignment', assignment_id=assignment.id) }}">✏️ Edit</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-records">
+        <p>No assignments yet. Create one to get started!</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

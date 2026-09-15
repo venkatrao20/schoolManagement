@@ -1,0 +1,17 @@
+{
+  "name": "school-academics-backend",
+  "version": "1.0.0",
+  "description": "Teachers & Academics, Attendance, and Examination & Results module for School Management App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "uuid": "^9.0.1"
+  }
+}

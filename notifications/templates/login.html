@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in - School Portal</title>
+<style>
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --border: #e3e5e9;
+  --text: #1a1c20;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --danger: #dc2626;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111317;
+    --surface: #1a1d23;
+    --border: #2a2e36;
+    --text: #e8eaed;
+    --muted: #9aa1ad;
+    --accent: #60a5fa;
+    --danger: #f87171;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+}
+
+.card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 30px 26px;
+  box-shadow: 0 4px 18px rgba(16, 24, 40, .07);
+}
+
+.logo { font-size: 30px; text-align: center; }
+
+h1 {
+  font-size: 20px;
+  font-weight: 650;
+  text-align: center;
+  margin: 8px 0 4px;
+}
+
+.sub {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 22px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 550;
+  margin-bottom: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 15px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+}
+
+input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-color: var(--accent);
+}
+
+button {
+  width: 100%;
+  padding: 11px;
+  border: none;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover { filter: brightness(1.07); }
+button:disabled { opacity: .6; cursor: default; }
+
+.error {
+  background: rgba(220, 38, 38, .1);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 13px;
+  margin-bottom: 15px;
+  display: none;
+}
+
+.error.show { display: block; }
+
+.hint {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.hint strong { color: var(--text); font-weight: 600; }
+
+.hint code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}
+
+.hint button {
+  width: auto;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  border-radius: 5px;
+  margin-left: 4px;
+}
+
+.hint .role-toggle {
+  margin: 5px 0 4px;
+  padding: 5px 9px;
+  font-weight: 600;
+}
+
+.parent-logins {
+  display: none;
+}
+
+.parent-logins.show {
+  display: block;
+}
+
+@media (max-width: 420px) {
+  body { padding: 12px; }
+  .card { padding: 24px 18px; border-radius: 11px; }
+  .hint { overflow-wrap: anywhere; }
+  .hint > div { margin-bottom: 2px; }
+}
+</style>
+</head>
+<body>
+
+<form class="card" id="loginForm" method="POST" action="/api/login" autocomplete="on">
+  <div class="logo">🏫</div>
+  <h1>School Portal</h1>
+  <p class="sub">Sign in to see your notifications and reports</p>
+
+  <div class="error" id="error"></div>
+
+  <label for="email">Email</label>
+  <input type="email" id="email" name="email" autocomplete="username email" required autofocus>
+
+  <label for="password">Password</label>
+  <input type="password" id="password" name="password" autocomplete="current-password" required>
+
+  <button type="submit" id="submit">Sign in</button>
+
+  <div class="hint">
+    <strong>Demo accounts</strong> (run <code>python seed_data.py</code> first)
+    <div><button type="button" class="role-toggle" id="parentLoginToggle">Parent login</button></div>
+    <div class="parent-logins" id="parentLogins">
+      <div>Parent <code>priya@example.com</code> <button type="button" data-email="priya@example.com" data-password="parent123">use</button></div>
+      <div>Parent <code>karan.parent@example.com</code> <button type="button" data-email="karan.parent@example.com" data-password="parent123">use</button></div>
+      <div>Parent <code>riya.parent@example.com</code> <button type="button" data-email="riya.parent@example.com" data-password="parent123">use</button></div>
+      <div>Parent <code>aditya.parent@example.com</code> <button type="button" data-email="aditya.parent@example.com" data-password="parent123">use</button></div>
+      <div>Parent <code>sana.parent@example.com</code> <button type="button" data-email="sana.parent@example.com" data-password="parent123">use</button></div>
+      <div>Parent <code>neel.parent@example.com</code> <button type="button" data-email="neel.parent@example.com" data-password="parent123">use</button></div>
+      <div>Parent <code>tara.parent@example.com</code> <button type="button" data-email="tara.parent@example.com" data-password="parent123">use</button></div>
+      <div>Parent <code>om.parent@example.com</code> <button type="button" data-email="om.parent@example.com" data-password="parent123">use</button></div>
+      <div>Parent <code>maya.parent@example.com</code> <button type="button" data-email="maya.parent@example.com" data-password="parent123">use</button></div>
+    </div>
+    <div>Teacher <code>rahul@example.com</code> <button type="button" data-email="rahul@example.com" data-password="teacher123">use</button></div>
+    <div>Admin <code>admin@example.com</code> <button type="button" data-email="admin@example.com" data-password="admin123">use</button></div>
+  </div>
+</form>
+
+<script>
+const form = document.getElementById("loginForm");
+const errorEl = document.getElementById("error");
+const submitEl = document.getElementById("submit");
+const emailEl = document.getElementById("email");
+const passwordEl = document.getElementById("password");
+
+
+function showError(message) {
+  errorEl.textContent = message;
+  errorEl.classList.add("show");
+}
+
+function getRedirectUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("redirect") || params.get("next") || "/";
+}
+
+let isSigningIn = false;
+
+async function performLogin(email, password, credObj = null) {
+  if (isSigningIn) return false;
+  isSigningIn = true;
+
+  errorEl.classList.remove("show");
+  submitEl.disabled = true;
+  submitEl.textContent = "Signing in...";
+
+  try {
+    const response = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: (email || "").trim(),
+        password: password || ""
+      })
+    });
+
+    const body = await response.json().catch(() => ({}));
+
+    if (response.ok) {
+      // Store or update in Google Password Manager / Credential Management API if supported
+      if (window.PasswordCredential && navigator.credentials && navigator.credentials.store) {
+        try {
+          let credToStore = credObj;
+          if (!credToStore && form) {
+            credToStore = new PasswordCredential(form);
+          }
+          if (credToStore) {
+            await navigator.credentials.store(credToStore);
+          }
+        } catch (credErr) {
+          console.debug("Credential storage notice:", credErr);
+        }
+      }
+      window.location.href = getRedirectUrl();
+      return true;
+    }
+
+    showError(body.error || "Sign in failed");
+
+  } catch (error) {
+    showError("Could not reach the server");
+  }
+
+  submitEl.disabled = false;
+  submitEl.textContent = "Sign in";
+  isSigningIn = false;
+  return false;
+}
+
+
+form.addEventListener("submit", async (submitEvent) => {
+  submitEvent.preventDefault();
+  await performLogin(emailEl.value, passwordEl.value);
+});
+
+
+// Auto sign-in if password is saved in Google Password Manager / Browser Credentials
+async function initAutoSignIn() {
+  if (navigator.credentials && navigator.credentials.get) {
+    try {
+      const cred = await navigator.credentials.get({
+        password: true,
+        mediation: "silent"
+      });
+
+      if (cred && cred.id && cred.password) {
+        emailEl.value = cred.id;
+        passwordEl.value = cred.password;
+        await performLogin(cred.id, cred.password, cred);
+        return;
+      }
+    } catch (err) {
+      console.debug("Silent credential auto-signin:", err);
+    }
+  }
+
+  // Check if browser autofill populated the fields
+  setTimeout(() => {
+    if (emailEl.value && passwordEl.value && !isSigningIn) {
+      const params = new URLSearchParams(window.location.search);
+      // Auto-submit if redirected from push or if inputs are prefilled
+      if (params.has("redirect") || params.has("from_push") || window.location.hash.includes("auto")) {
+        performLogin(emailEl.value, passwordEl.value);
+      }
+    }
+  }, 300);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initAutoSignIn);
+} else {
+  initAutoSignIn();
+}
+
+
+document.getElementById("parentLoginToggle").addEventListener("click", () => {
+  document.getElementById("parentLogins").classList.toggle("show");
+});
+
+
+// Fill in a demo account
+document.querySelectorAll(".hint button[data-email]").forEach(button => {
+  button.addEventListener("click", () => {
+    emailEl.value = button.dataset.email;
+    passwordEl.value = button.dataset.password;
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>School Management App — Academics Module</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<style>
+  :root{
+    --primary:#2952e3; --primary-dark:#1e3fb8; --bg:#f4f6fb; --card:#ffffff;
+    --text:#1a1f36; --muted:#6b7280; --border:#e5e7eb; --green:#16a34a; --red:#dc2626;
+    --amber:#d97706; --purple:#7c3aed;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  #root{min-height:100vh;display:flex;}
+  .sidebar{width:250px;background:#111827;color:#fff;display:flex;flex-direction:column;flex-shrink:0;}
+  .sidebar h1{font-size:16px;padding:20px 16px;margin:0;border-bottom:1px solid #1f2937;}
+  .sidebar .group-title{font-size:11px;text-transform:uppercase;color:#9ca3af;padding:16px 16px 6px;letter-spacing:.05em;}
+  .sidebar button{background:none;border:none;color:#d1d5db;text-align:left;padding:9px 16px;font-size:13.5px;cursor:pointer;border-left:3px solid transparent;}
+  .sidebar button:hover{background:#1f2937;color:#fff;}
+  .sidebar button.active{background:#1f2937;color:#fff;border-left-color:var(--primary);font-weight:600;}
+  .main{flex:1;padding:24px 32px;overflow-y:auto;max-height:100vh;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+  .topbar h2{margin:0;font-size:22px;}
+  .topbar p{margin:2px 0 0;color:var(--muted);font-size:13px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,0,0,0.03);}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;}
+  .stat-card .num{font-size:26px;font-weight:700;color:var(--primary);}
+  .stat-card .label{font-size:12.5px;color:var(--muted);margin-top:4px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{text-align:left;background:#f9fafb;padding:9px 10px;border-bottom:2px solid var(--border);color:#374151;font-weight:600;}
+  td{padding:9px 10px;border-bottom:1px solid var(--border);}
+  tr:hover td{background:#fafbff;}
+  .btn{background:var(--primary);color:#fff;border:none;padding:8px 14px;border-radius:6px;font-size:13px;cursor:pointer;font-weight:500;}
+  .btn:hover{background:var(--primary-dark);}
+  .btn-sm{padding:5px 10px;font-size:12px;}
+  .btn-outline{background:#fff;border:1px solid var(--border);color:var(--text);}
+  .btn-danger{background:#fee2e2;color:var(--red);}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px;}
+  label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;font-weight:500;}
+  input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13.5px;font-family:inherit;}
+  textarea{resize:vertical;min-height:60px;}
+  .badge{padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:600;display:inline-block;}
+  .badge-green{background:#dcfce7;color:var(--green);}
+  .badge-red{background:#fee2e2;color:var(--red);}
+  .badge-amber{background:#fef3c7;color:var(--amber);}
+  .badge-blue{background:#dbeafe;color:var(--primary);}
+  .badge-gray{background:#f3f4f6;color:#4b5563;}
+  .tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);}
+  .tabs button{background:none;border:none;padding:9px 16px;font-size:13.5px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;}
+  .tabs button.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600;}
+  .section-title{font-size:16px;font-weight:700;margin:0 0 12px;}
+  .flex-between{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .empty{color:var(--muted);font-size:13px;padding:20px;text-align:center;}
+  .pill-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .progress-bar{background:#e5e7eb;border-radius:20px;height:8px;width:100%;overflow:hidden;}
+  .progress-fill{background:var(--primary);height:100%;border-radius:20px;}
+  .loading{padding:40px;text-align:center;color:var(--muted);}
+  .report-card{max-width:700px;margin:0 auto;}
+  .rc-header{text-align:center;border-bottom:2px solid var(--text);padding-bottom:12px;margin-bottom:16px;}
+  select#studentPicker{max-width:280px;}
+  ::-webkit-scrollbar{width:8px;height:8px;} ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useCallback } = React;
+
+const API = '/api';
+
+async function apiCall(path, opts = {}) {
+  const res = await fetch(API + path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+  });
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error || 'Request failed');
+  return json.data;
+}
+
+function useFetch(path, deps = []) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const reload = useCallback(() => {
+    setLoading(true);
+    apiCall(path).then(d => { setData(d); setLoading(false); }).catch(e => { setError(e.message); setLoading(false); });
+  }, [path]);
+  useEffect(() => { reload(); }, deps);
+  return [data, loading, error, reload];
+}
+
+function Badge({ status }) {
+  const map = {
+    Present: 'badge-green', Absent: 'badge-red', Late: 'badge-amber', 'Half-Day': 'badge-blue',
+    Approved: 'badge-green', Rejected: 'badge-red', Pending: 'badge-amber',
+    Active: 'badge-green', Inactive: 'badge-gray', 'On Leave': 'badge-amber',
+    Published: 'badge-green', Draft: 'badge-gray',
+    Completed: 'badge-green', 'In Progress': 'badge-amber', 'Not Started': 'badge-gray',
+    Pass: 'badge-green', Fail: 'badge-red'
+  };
+  return <span className={"badge " + (map[status] || 'badge-gray')}>{status}</span>;
+}
+
+/* ============== DASHBOARD ============== */
+function Dashboard() {
+  const [data, loading] = useFetch('/academics/dashboard');
+  if (loading) return <div className="loading">Loading dashboard...</div>;
+  if (!data) return null;
+  return (
+    <div>
+      <div className="stats-grid">
+        <div className="stat-card"><div className="num">{data.totalTeachers}</div><div className="label">Active Teachers</div></div>
+        <div className="stat-card"><div className="num">{data.totalStudents}</div><div className="label">Total Students</div></div>
+        <div className="stat-card"><div className="num">{data.totalClasses}</div><div className="label">Classes</div></div>
+        <div className="stat-card"><div className="num">{data.totalHomeworkThisWeek}</div><div className="label">Homework (7 days)</div></div>
+      </div>
+      <div className="card">
+        <div className="section-title">Syllabus Progress</div>
+        {data.syllabusProgress.length === 0 && <div className="empty">No syllabus entries yet.</div>}
+        {data.syllabusProgress.map((s, i) => (
+          <div key={i} style={{ marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
+              <span>{s.subject_name} — {s.class_name} {s.section}</span>
+              <span>{Math.round(s.avg_completion)}%</span>
+            </div>
+            <div className="progress-bar"><div className="progress-fill" style={{ width: Math.round(s.avg_completion) + '%' }}></div></div>
+          </div>
+        ))}
+      </div>
+      <div className="card">
+        <div className="section-title">Today's Attendance Summary</div>
+        <div className="pill-row">
+          {data.todayAttendanceSummary.length === 0 && <div className="empty">No attendance marked today yet.</div>}
+          {data.todayAttendanceSummary.map((s, i) => (
+            <div key={i} style={{ padding: '6px 14px', background: '#f9fafb', borderRadius: 8, fontSize: 13 }}>
+              <Badge status={s.status} /> <b style={{ marginLeft: 6 }}>{s.count}</b>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="card">
+        <div className="section-title">Upcoming Academic Calendar Events</div>
+        <table>
+          <thead><tr><th>Event</th><th>Type</th><th>Date</th></tr></thead>
+          <tbody>
+            {data.upcomingEvents.map(e => (
+              <tr key={e.id}><td>{e.title}</td><td>{e.event_type}</td><td>{e.start_date}</td></tr>
+            ))}
+            {data.upcomingEvents.length === 0 && <tr><td colSpan="3" className="empty">No upcoming events.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ============== TEACHER PROFILES ============== */
+function TeacherProfiles() {
+  const [teachers, loading, err, reload] = useFetch('/academics/teachers');
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ employee_id: '', name: '', email: '', phone: '', qualification: '', designation: '', subject_specialization: '', joining_date: '' });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    await apiCall('/academics/teachers', { method: 'POST', body: JSON.stringify(form) });
+    setForm({ employee_id: '', name: '', email: '', phone: '', qualification: '', designation: '', subject_specialization: '', joining_date: '' });
+    setShowForm(false);
+    reload();
+  };
+
+  const del = async (id) => { if (confirm('Delete this teacher profile?')) { await apiCall('/academics/teachers/' + id, { method: 'DELETE' }); reload(); } };
+
+  return (
+    <div>
+      <div className="flex-between">
+        <div></div>
+        <button className="btn" onClick={() => setShowForm(!showForm)}>{showForm ? 'Cancel' : '+ Add Teacher'}</button>
+      </div>
+      {showForm && (
+        <div className="card">
+          <form onSubmit={submit}>
+            <div className="form-grid">
+              <div><label>Employee ID *</label><input required value={form.employee_id} onChange={e => setForm({ ...form, employee_id: e.target.value })} /></div>
+              <div><label>Full Name *</label><input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
+              <div><label>Email</label><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></div>
+              <div><label>Phone</label><input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
+              <div><label>Qualification</label><input value={form.qualification} onChange={e => setForm({ ...form, qualification: e.target.value })} /></div>
+              <div><label>Designation</label><input value={form.designation} onChange={e => setForm({ ...form, designation: e.target.value })} /></div>
+              <div><label>Subject Specialization</label><input value={form.subject_specialization} onChange={e => setForm({ ...form, subject_specialization: e.target.value })} /></div>
+              <div><label>Joining Date</label><input type="date" value={form.joining_date} onChange={e => setForm({ ...form, joining_date: e.target.value })} /></div>
+            </div>
+            <button className="btn" type="submit">Save Teacher</button>
+          </form>
+        </div>
+      )}
+      <div className="card">
+        {loading ? <div className="loading">Loading...</div> : (
+          <table>
+            <thead><tr><th>Emp ID</th><th>Name</th><th>Designation</th><th>Specialization</th><th>Contact</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              {teachers.map(t => (
+                <tr key={t.id}>
+                  <td>{t.employee_id}</td><td>{t.name}</td><td>{t.designation}</td><td>{t.subject_specialization}</td>
+                  <td>{t.phone}<br /><span style={{ color: 'var(--muted)', fontSize: 12 }}>{t.email}</span></td>
+                  <td><Badge status={t.status} /></td>
+                  <td><button className="btn btn-sm btn-danger" onClick={() => del(t.id)}>Delete</button></td>
+                </tr>
+              ))}
+              {teachers.length === 0 && <tr><td colSpan="7" className="empty">No teacher profiles yet.</td></tr>}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============== TEACHER-CLASS ALLOCATION ============== */
+function Allocation() {
+  const [allocations, loading, err, reload] = useFetch('/academics/allocations');
+  const [teachers] = useFetch('/academics/teachers');
+  const [classes] = useFetch('/academics/classes');
+  const [subjects] = useFetch('/academics/subjects');
+  const [form, setForm] = useState({ teacher_id: '', class_id: '', subject_id: '', is_class_teacher: false });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!form.teacher_id || !form.class_id || !form.subject_id) return alert('Select teacher, class and subject');
+    await apiCall('/academics/allocations', { method: 'POST', body: JSON.stringify(form) });
+    setForm({ teacher_id: '', class_id: '', subject_id: '', is_class_teacher: false });
+    reload();
+  };
+  const del = async (id) => { await apiCall('/academics/allocations/' + id, { method: 'DELETE' }); reload(); };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="section-title">Allocate Teacher to Class & Subject</div>
+        <form onSubmit={submit}>
+          <div className="form-grid">
+            <div><label>Teacher</label>
+              <select value={form.teacher_id} onChange={e => setForm({ ...form, teacher_id: e.target.value })}>
+                <option value="">Select teacher</option>
+                {teachers && teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </div>
+            <div><label>Class</label>
+              <select value={form.class_id} onChange={e => setForm({ ...form, class_id: e.target.value })}>
+                <option value="">Select class</option>
+                {classes && classes.map(c => <option key={c.id} value={c.id}>{c.name} - {c.section}</option>)}
+              </select>
+            </div>
+            <div><label>Subject</label>
+              <select value={form.subject_id} onChange={e => setForm({ ...form, subject_id: e.target.value })}>
+                <option value="">Select subject</option>
+                {subjects && subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, paddingBottom: 8 }}>
+              <input type="checkbox" style={{ width: 'auto' }} checked={form.is_class_teacher} onChange={e => setForm({ ...form, is_class_teacher: e.target.checked })} />
+              <label style={{ margin: 0 }}>Class Teacher</label>
+            </div>
+          </div>
+          <button className="btn" type="submit">Allocate</button>
+        </form>
+      </div>
+      <div className="card">
+        {loading ? <div className="loading">Loading...</div> : (
+          <table>
+            <thead><tr><th>Teacher</th><th>Class</th><th>Subject</th><th>Class Teacher?</th><th></th></tr></thead>
+            <tbody>
+              {allocations.map(a => (
+                <tr key={a.id}>
+                  <td>{a.teacher_name}</td><td>{a.class_name} {a.section}</td><td>{a.subject_name}</td>
+                  <td>{a.is_class_teacher ? <Badge status="Active" /> : '—'}</td>
+                  <td><button className="btn btn-sm btn-danger" onClick={() => del(a.id)}>Remove</button></td>
+                </tr>
+              ))}
+              {allocations.length === 0 && <tr><td colSpan="5" className="empty">No allocations yet.</td></tr>}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============== TIMETABLE ============== */
+function Timetable() {
+  const [classes] = useFetch('/academics/classes');
+  const [subjects] = useFetch('/academics/subjects');
+  const [teachers] = useFetch('/academics/teachers');
+  const [selectedClass, setSelectedClass] = useState('');
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ class_id: '', subject_id: '', teacher_id: '', day_of_week: 'Monday', period_no: 1, start_time: '', end_time: '', room: '' });
+
+  const load = useCallback((classId) => {
+    setLoading(true);
+    apiCall('/academics/timetable' + (classId ? '?class_id=' + classId : '')).then(d => { setEntries(d); setLoading(false); });
+  }, []);
+  useEffect(() => { load(selectedClass); }, [selectedClass]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    await apiCall('/academics/timetable', { method: 'POST', body: JSON.stringify(form) });
+    load(selectedClass);
+  };
+  const del = async (id) => { await apiCall('/academics/timetable/' + id, { method: 'DELETE' }); load(selectedClass); };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="section-title">Add Timetable Entry</div>
+        <form onSubmit={submit}>
+          <div className="form-grid">
+            <div><label>Class</label>
+              <select value={form.class_id} onChange={e => setForm({ ...form, class_id: e.target.value })} required>
+                <option value="">Select</option>
+                {classes && classes.map(c => <option key={c.id} value={c.id}>{c.name} - {c.section}</option>)}
+              </select>
+            </div>
+            <div><label>Subject</label>
+              <select value={form.subject_id} onChange={e => setForm({ ...form, subject_id: e.target.value })} required>
+                <option value="">Select</option>
+                {subjects && subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+            <div><label>Teacher</label>
+              <select value={form.teacher_id} onChange={e => setForm({ ...form, teacher_id: e.target.value })} required>
+                <option value="">Select</option>
+                {teachers && teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </div>
+            <div><label>Day</label>
+              <select value={form.day_of_week} onChange={e => setForm({ ...form, day_of_week: e.target.value })}>
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(d => <option key={d}>{d}</option>)}
+              </select>
+            </div>
+            <div><label>Period No</label><input type="number" min="1" value={form.period_no} onChange={e => setForm({ ...form, period_no: e.target.value })} /></div>
+            <div><label>Start Time</label><input type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} /></div>
+            <div><label>End Time</label><input type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} /></div>
+            <div><label>Room</label><input value={form.room} onChange={e => setForm({ ...form, room: e.target.value })} /></div>
+          </div>
+          <button className="btn" type="submit">Add to Timetable</button>
+        </form>
+      </div>
+
+      <div className="card">
+        <div className="flex-between">
+          <div className="section-title" style={{ margin: 0 }}>Timetable</div>
+          <select style={{ maxWidth: 220 }} value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
+            <option value="">All classes</option>
+            {classes && classes.map(c => <option key={c.id} value={c.id}>{c.name} - {c.section}</option>)}
+          </select>
+        </div>
+        {loading ? <div className="loading">Loading...</div> : (
+          <table>
+            <thead><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Teacher</th><th>Time</th><th>Room</th><th></th></tr></thead>
+            <tbody>
+              {entries.map(t => (
+                <tr key={t.id}>
+                  <td>{t.day_of_week}</td><td>{t.period_no}</td><td>{t.class_name} {t.section}</td>
+                  <td>{t.subject_name}</td><td>{t.teacher_name}</td><td>{t.start_time}–{t.end_time}</td><td>{t.room}</td>
+                  <td><button className="btn btn-sm btn-danger" onClick={() => del(t.id)}>Del</button></td>
+                </tr>
+              ))}
+              {entries.length === 0 && <tr><td colSpan="8" className="empty">No timetable entries.</td></tr>}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============== HOMEWORK ============== */
+function Homework() {
+  const [homework, loading, err, reload] = useFetch('/academics/homework');
+  const [classes] = useFetch('/academics/classes');
+  const [subjects] = useFetch('/academics/subjects');
+  const [teachers] = useFetch('/academics/teachers');
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ class_id: '', subject_id: '', teacher_id: '', title: '', description: '', due_date: '', status: 'Published' });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    await apiCall('/academics/homework', { method: 'POST', body: JSON.stringify(form) });
+    setForm({ class_id: '', subject_id: '', teacher_id: '', title: '', description: '', due_date: '', status: 'Published' });
+    setShowForm(false);
+    reload();
+  };
+  const del = async (id) => { await apiCall('/academics/homework/' + id, { method: 'DELETE' }); reload(); };
+
+  return (
+    <div>
+      <div className="flex-between"><div></div><button className="btn" onClick={() => setShowForm(!showForm)}>{showForm ? 'Cancel' : '+ Create Homework'}</button></div>
+      {showForm && (
+        <div className="card">
+          <form onSubmit={submit}>
+            <div className="form-grid">
+              <div><label>Class</label><select required value={form.class_id} onChange={e => setForm({ ...form, class_id: e.target.value })}><option value="">Select</option>{classes && classes.map(c => <option key={c.id} value={c.id}>{c.name} - {c.section}</option>)}</select></div>
+              <div><label>Subject</label><select required value={form.subject_id} onChange={e => setForm({ ...form, subject_id: e.target.value })}><option value="">Select</option>{subjects && subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
+              <div><label>Teacher</label><select required value={form.teacher_id} onChange={e => setForm({ ...form, teacher_id: e.target.value })}><option value="">Select</option>{teachers && teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
+              <div><label>Due Date</label><input type="date" value={form.due_date} onChange={e => setForm({ ...form, due_date: e.target.value })} /></div>
+              <div><label>Status</label><select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}><option>Draft</option><option>Published</option></select></div>
+            </div>
+            <div style={{ marginBottom: 12 }}><label>Title</label><input required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
+            <div style={{ marginBottom: 12 }}><label>Description</label><textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
+            <button className="btn" type="submit">Save Homework</button>
+          </form>
+        </div>
+      )}
+      <div className="card">
+        {loading ? <div className="loading">Loading...</div> : (
+          <table>
+            <thead><tr><th>Title</th><th>Class</th><th>Subject</th><th>Teacher</th><th>Due</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              {homework.map(h => (
+                <tr key={h.id}>
+                  <td>{h.title}<br /><span style={{ color: 'var(--muted)', fontSize: 12 }}>{h.description}</span></td>
+                  <td>{h.class_name} {h.section}</td><td>{h.subject_name}</td><td>{h.teacher_name}</td><td>{h.due_date}</td>
+                  <td><Badge status={h.status} /></td>
+                  <td><button className="btn btn-sm btn-danger" onClick={() => del(h.id)}>Delete</button></td>
+                </tr>
+              ))}
+              {homework.length === 0 && <tr><td colSpan="7" className="empty">No homework created yet.</td></tr>}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============== SYLLABUS ============== */
+function Syllabus() {
+  const [rows, loading, err, reload] = useFetch('/academics/syllabus');
+  const [classes] = useFetch('/academics/classes');
+  const [subjects] = useFetch('/academics/subjects');
+  const [teachers] = useFetch('/academics/teachers');
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ class_id: '', subject_id: '', teacher_id: '', unit_title: '', topics: '', planned_start_date: '', planned_end_date: '', completion_status: 'Not Started', completion_percent: 0 });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    await apiCall('/academics/syllabus', { method: 'POST', body: JSON.stringify(form) });
+    setForm({ class_id: '', subject_id: '', teacher_id: '', unit_title: '', topics: '', planned_start_date: '', planned_end_date: '', completion_status: 'Not Started', completion_percent: 0 });
+    setShowForm(false);
+    reload();
+  };
+  const del = async (id) => { await apiCall('/academics/syllabus/' + id, { method: 'DELETE' }); reload(); };
+
+  return (
+    <div>
+      <div className="flex-between"><div></div><button className="btn" onClick={() => setShowForm(!showForm)}>{showForm ? 'Cancel' : '+ Add Syllabus / Lesson Plan'}</button></div>
+      {showForm && (
+        <div className="card">
+          <form onSubmit={submit}>
+            <div className="form-grid">
+              <div><label>Class</label><select required value={form.class_id} onChange={e => setForm({ ...form, class_id: e.target.value })}><option value="">Select</option>{classes && classes.map(c => <option key={c.id} value={c.id}>{c.name} - {c.section}</option>)}</select></div>
+              <div><label>Subject</label><select required value={form.subject_id} onChange={e => setForm({ ...form, subject_id: e.target.value })}><option value="">Select</option>{subjects && subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
+              <div><label>Teacher</label><select required value={form.teacher_id} onChange={e => setForm({ ...form, teacher_id: e.target.value })}><option value="">Select</option>{teachers && teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
+              <div><label>Status</label><select value={form.completion_status} onChange={e => setForm({ ...form, completion_status: e.target.value })}><option>Not Started</option><option>In Progress</option><option>Completed</option></select></div>
+              <div><label>Start Date</label><input type="date" value={form.planned_start_date} onChange={e => setForm({ ...form, planned_start_date: e.target.value })} /></div>
+              <div><label>End Date</label><input type="date" value={form.planned_end_date} onChange={e => setForm({ ...form, planned_end_date: e.target.value })} /></div>
+              <div><label>Completion %</label><input type="number" min="0" max="100" value={form.completion_percent} onChange={e => setForm({ ...form, completion_percent: e.target.value })} /></div>
+            </div>
+            <div style={{ marginBottom: 12 }}><label>Unit / Chapter Title</label><input required value={form.unit_title} onChange={e => setForm({ ...form, unit_title: e.target.value })} /></div>
+            <div style={{ marginBottom: 12 }}><label>Topics</label><textarea value={form.topics} onChange={e => setForm({ ...form, topics: e.target.value })} /></div>
+            <button className="btn" type="submit">Save</button>
+          </form>
+        </div>
+      )}
+      <div className="card">
+        {loading ? <div className="loading">Loading...</div> : (
+          <table>
+            <thead><tr><th>Unit</th><th>Class</th><th>Subject</th><th>Teacher</th><th>Progress</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              {rows.map(s => (
+                <tr key={s.id}>
+                  <td>{s.unit_title}<br /><span style={{ color: 'var(--muted)', fontSize: 12 }}>{s.topics}</span></td>
+                  <td>{s.class_name} {s.section}</td><td>{s.subject_name}</td><td>{s.teacher_name}</td>
+                  <td style={{ minWidth: 100 }}>
+                    <div className="progress-bar"><div className="progress-fill" style={{ width: s.completion_percent + '%' }}></div></div>
+                    <span style={{ fontSize: 11 }}>{s.completion_percent}%</span>
+                  </td>
+                  <td><Badge status={s.completion_status} /></td>
+                  <td><button className="btn btn-sm btn-danger" onClick={() => del(s.id)}>Delete</button></td>
+                </tr>
+              ))}
+              {rows.length === 0 && <tr><td colSpan="7" className="empty">No syllabus entries yet.</td></tr>}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============== ACADEMIC CALENDAR ============== */
+function Calendar() {
+  const [events, loading, err, reload] = useFetch('/academics/calendar');
+  const [form, setForm] = useState({ title: '', event_type: 'Event', start_date: '', end_date: '', description: '' });
+  const submit = async (e) => {
+    e.preventDefault();
+    await apiCall('/academics/calendar', { method: 'POST', body: JSON.stringify(form) });
+    setForm({ title: '', event_type: 'Event', start_date: '', end_date: '', description: '' });
+    reload();
+  };
+  const del = async (id) => { await apiCall('/academics/calendar/' + id, { method: 'DELETE' }); reload(); };
+  return (
+    <div>
+      <div className="card">
+        <div className="section-title">Add Calendar Event</div>
+        <form onSubmit={submit}>
+          <div className="form-grid">
+            <div><label>Title</label><input required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
+            <div><label>Type</label><select value={form.event_type} onChange={e => setForm({ ...form, event_type: e.target.value })}><option>Holiday</option><option>Exam</option><option>Event</option><option>PTM</option><option>Sports Day</option></select></div>
+            <div><label>Start Date</label><input required type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} /></div>
+            <div><label>End Date</label><input type="date" value={form.end_date} onChange={e => setForm({ ...form, end_date: e.target.value })} /></div>
+          </div>
+          <div style={{ marginBottom: 12 }}><label>Description</label><textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
+          <button className="btn" type="submit">Add Event</button>
+        </form>
+      </div>
+      <div className="card">
+        {loading ? <div className="loading">Loading...</div> : (
+          <table>
+            <thead><tr><th>Title</th><th>Type</th><th>Start</th><th>End</th><th></th></tr></thead>
+            <tbody>
+              {events.map(ev => (
+                <tr key={ev.id}><td>{ev.title}</td><td>{ev.event_type}</td><td>{ev.start_date}</td><td>{ev.end_date}</td>
+                  <td><button className="btn btn-sm btn-danger" onClick={() => del(ev.id)}>Delete</button></td></tr>
+              ))}
+              {events.length === 0 && <tr><td colSpan="5" className="empty">No events yet.</td></tr>}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============== MARKS / ACADEMIC INFORMATION ============== */
+function AcademicInfo() {
+  const [students] = useFetch('/academics/students');
+  const [selected, setSelected] = useState('');
+  const [info, setInfo] = useState(null);
+  useEffect(() => {
+    if (selected) apiCall('/academics/academic-info/' + selected).then(setInfo);
+    else setInfo(null);
+  }, [selected]);
+  return (
+    <div>
+      <div className="card">
+        <label>Select Student</label>
+        <select id="studentPicker" value={selected} onChange={e => setSelected(e.target.value)}>
+          <option value="">Choose a student</option>
+          {students && students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.admission_no})</option>)}
+        </select>
+      </div>
+      {info && (
+        <div className="card">
+          <div className="section-title">{info.student.name} — Academic Information</div>
+          <p style={{ fontSize: 13, color: 'var(--muted)' }}>Homework assigned to class: {info.homeworkAssigned}</p>
+          <b style={{ fontSize: 13 }}>Attendance</b>
+          <div className="pill-row" style={{ margin: '8px 0 16px' }}>
+            {info.attendance.map((a, i) => <div key={i} style={{ padding: '5px 12px', background: '#f9fafb', borderRadius: 8, fontSize: 13 }}><Badge status={a.status} /> {a.count}</div>)}
+            {info.attendance.length === 0 && <span className="empty">No attendance recorded.</span>}
+          </div>
+          <b style={{ fontSize: 13 }}>Marks</b>
+          <table style={{ marginTop: 8 }}>
+            <thead><tr><th>Exam</th><th>Subject</th><th>Marks</th><th>Grade</th></tr></thead>
+            <tbody>
+              {info.marks.map((m, i) => <tr key={i}><td>{m.exam_name}</td><td>{m.subject_name}</td><td>{m.marks_obtained}/{m.max_marks}</td><td><Badge status={m.grade} /></td></tr>)}
+              {info.marks.length === 0 && <tr><td colSpan="4" className="empty">No marks recorded.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============== ATTENDANCE: STUDENT ============== */
+function StudentAttendance() {
+  const [classes] = useFetch('/academics/classes');
+  const [selectedClass, setSelectedClass] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [students, setStudents] = useState([]);
+  const [marks, setMarks] = useState({});
+
+  useEffect(() => {
+    if (selectedClass) {
+      apiCall('/academics/students?class_id=' + selectedClass).then(async (studs) => {
+        setStudents(studs);
+        const existing = await apiCall('/attendance/student?class_id=' + selectedClass + '&date=' + date);
+        const m = {};
+        studs.forEach(s => {
+          const rec = existing.find(e => e.student_id === s.id);
+          m[s.id] = rec ? rec.status : 'Present';
+        });
+        setMarks(m);
+      });
+    } else { setStudents([]); }
+  }, [selectedClass, date]);
+
+  const setStatus = (studentId, status) => setMarks({ ...marks, [studentId]: status });
+
+  const saveAll = async () => {
+    const records = students.map(s => ({ student_id: s.id, class_id: Number(selectedClass), attendance_date: date, status: marks[s.id] }));
+    await apiCall('/attendance/student', { method: 'POST', body: JSON.stringify(records) });
+    alert('Attendance saved for ' + records.length + ' students.');
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="form-grid">
+          <div><label>Class</label><select value={selectedClass} onChange={e => setSelectedClass(e.target.value)}><option value="">Select class</option>{classes && classes.map(c => <option key={c.id} value={c.id}>{c.name} - {c.section}</option>)}</select></div>
+          <div><label>Date</label><input type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
+        </div>
+      </div>
+      {students.length > 0 && (
+        <div className="card">
+          <div className="flex-between"><div className="section-title" style={{ margin: 0 }}>Mark Attendance</div><button className="btn" onClick={saveAll}>Save Attendance</button></div>
+          <table>
+            <thead><tr><th>Roll No</th><th>Name</th><th>Status</th></tr></thead>
+            <tbody>
+              {students.map(s => (
+                <tr key={s.id}>
+                  <td>{s.roll_no}</td><td>{s.name}</td>
+                  <td>
+                    <select value={marks[s.id] || 'Present'} onChange={e => setStatus(s.id, e.target.value)} style={{ maxWidth: 150 }}>
+                      <option>Present</option><option>Absent</option><option>Late</option><option>Half-Day</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {selectedClass && students.length === 0 && <div className="empty">No students found in this class.</div>}
+    </div>
+  );
+}
+
+/* ============== ATTENDANCE CORRECTION ============== */
+function AttendanceCorrection() {
+  const [classes] = useFetch('/academics/classes');
+  const [selectedClass, setSelectedClass] = useState('');
+  const [records, setRecords] = useState([]);
+  const load = () => { if (selectedClass) apiCall('/attendance/student?class_id=' + selectedClass).then(setRecords); };
+  useEffect(load, [selectedClass]);
+
+  const correct = async (id, status) => {
+    await apiCall('/attendance/student/' + id + '/correct', { method: 'PUT', body: JSON.stringify({ status, corrected_by: null }) });
+    load();
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <label>Class</label>
+        <select style={{ maxWidth: 260 }} value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
+          <option value="">Select class</option>{classes && classes.map(c => <option key={c.id} value={c.id}>{c.name} - {c.section}</option>)}
+        </select>
+      </div>
+      <div className="card">
+        <table>
+          <thead><tr><th>Date</th><th>Student</th><th>Current Status</th><th>Corrected?</th><th>Correct To</th></tr></thead>
+          <tbody>
+            {records.map(r => (
+              <tr key={r.id}>
+                <td>{r.attendance_date}</td><td>{r.student_name}</td><td><Badge status={r.status} /></td>
+                <td>{r.is_corrected ? 'Yes' : 'No'}</td>
+                <td>
+                  <select defaultValue="" onChange={e => e.target.value && correct(r.id, e.target.value)} style={{ maxWidth: 160 }}>
+                    <option value="">Change to...</option>
+                    <option>Present</option><option>Absent</option><option>Late</option><option>Half-Day</option>
+                  </select>
+                </td>
+              </tr>
+            ))}
+            {records.length === 0 && <tr><td colSpan="5" className="empty">Select a class to view records.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ============== ATTENDANCE REPORTS ============== */
+function AttendanceReports() {
+  const [classes] = useFetch('/academics/classes');
+  const [selectedClass, setSelectedClass] = useState('');
+  const [report, setReport] = useState([]);
+  const [dailyOverview] = useFetch('/attendance/reports/daily-overview');
+
+  useEffect(() => { if (selectedClass) apiCall('/attendance/reports/class-summary?class_id=' + selectedClass).then(setReport); }, [selectedClass]);
+
+  return (
+    <div>
+      <div className="card">
+        <div className="section-title">Today's Overview (All Classes)</div>
+        <table>
+          <thead><tr><th>Class</th><th>Present</th><th>Absent</th><th>Late</th><th>Half-Day</th></tr></thead>
+          <tbody>
+            {dailyOverview && dailyOverview.classes.map(c => (
+              <tr key={c.class_id}><td>{c.class_name} {c.section}</td><td>{c.present}</td><td>{c.absent}</td><td>{c.late}</td><td>{c.half_day}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="card">
+        <label>View Detailed Report for Class</label>
+        <select style={{ maxWidth: 260, marginBottom: 12 }} value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
+          <option value="">Select class</option>{classes && classes.map(c => <option key={c.id} value={c.id}>{c.name} - {c.section}</option>)}
+        </select>
+        <table>
+          <thead><tr><th>Student</th><th>Present</th><th>Absent</th><th>Late</th><th>Half-Day</th><th>Total Marked</th></tr></thead>
+          <tbody>
+            {report.map(r => (
+              <tr key={r.student_id}><td>{r.student_name}</td><td>{r.present_count}</td><td>{r.absent_count}</td><td>{r.late_count}</td><td>{r.half_day_count}</td><td>{r.total_marked}</td></tr>
+            ))}
+            {report.length === 0 && <tr><td colSpan="6" className="empty">Select a class.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ============== STAFF ATTENDANCE ============== */
+function StaffAttendance() {
+  const [teachers] = useFetch('/academics/teachers');
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [marks, setMarks] = useState({});
+  const [records, loading, err, reload] = useFetch('/attendance/staff?date=' + date, [date]);
+
+  useEffect(() => {
+    if (teachers) {
+      const m = {};
+      teachers.forEach(t => {
+        const rec = records && records.find(r => r.teacher_id === t.id);
+        m[t.id] = rec ? rec.status : 'Present';
+      });
+      setMarks(m);
+    }
+  }, [teachers, records]);
+
+  const saveAll = async () => {
+    const payload = teachers.map(t => ({ teacher_id: t.id, attendance_date: date, status: marks[t.id] }));
+    await apiCall('/attendance/staff', { method: 'POST', body: JSON.stringify(payload) });
+    reload();
+    alert('Staff attendance saved.');
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="form-grid">
+          <div><label>Date</label><input type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
+        </div>
+      </div>
+      <div className="card">
+        <div className="flex-between"><div className="section-title" style={{ margin: 0 }}>Mark Staff Attendance</div><button className="btn" onClick={saveAll}>Save</button></div>
+        <table>
+          <thead><tr><th>Employee ID</th><th>Name</th><th>Designation</th><th>Status</th></tr></thead>
+          <tbody>
+            {teachers && teachers.map(t => (
+              <tr key={t.id}>
+                <td>{t.employee_id}</td><td>{t.name}</td><td>{t.designation}</td>
+                <td>
+                  <select value={marks[t.id] || 'Present'} onChange={e => setMarks({ ...marks, [t.id]: e.target.value })} style={{ maxWidth: 160 }}>
+                    <option>Present</option><option>Absent</option><option>Late</option><option>Half-Day</option><option>On Leave</option>
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ============== LEAVE MANAGEMENT ============== */
+function LeaveManagement() {
+  const [leaves, loading, err, reload] = useFetch('/attendance/leave');
+  const [teachers] = useFetch('/academics/teachers');
+  const [form, setForm] = useState({ applicant_type: 'Teacher', teacher_id: '', leave_type: 'Sick', start_date: '', end_date: '', reason: '' });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    await apiCall('/attendance/leave', { method: 'POST', body: JSON.stringify(form) });
+    setForm({ applicant_type: 'Teacher', teacher_id: '', leave_type: 'Sick', start_date: '', end_date: '', reason: '' });
+    reload();
+  };
+  const setStatus = async (id, status) => { await apiCall('/attendance/leave/' + id + '/status', { method: 'PUT', body: JSON.stringify({ status }) }); reload(); };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="section-title">Apply for Leave</div>
+        <form onSubmit={submit}>
+          <div className="form-grid">
+            <div><label>Teacher</label><select required value={form.teacher_id} onChange={e => setForm({ ...form, teacher_id: e.target.value })}><option value="">Select</option>{teachers && teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
+            <div><label>Leave Type</label><select value={form.leave_type} onChange={e => setForm({ ...form, leave_type: e.target.value })}><option>Sick</option><option>Casual</option><option>Earned</option><option>Other</option></select></div>
+            <div><label>Start Date</label><input required type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} /></div>
+            <div><label>End Date</label><input required type="date" value={form.end_date} onChange={e => setForm({ ...form, end_date: e.target.value })} /></div>
+          </div>
+          <div style={{ marginBottom: 12 }}><label>Reason</label><textarea value={form.reason} onChange={e => setForm({ ...form, reason: e.target.value })} /></div>
+          <button className="btn" type="submit">Submit Leave Request</button>
+        </form>
+      </div>
+      <div className="card">
+        {loading ? <div className="loading">Loading...</div> : (
+          <table>
+            <thead><tr><th>Applicant</th><th>Type</th><th>From</th><th>To</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              {leaves.map(l => (
+                <tr key={l.id}>
+                  <td>{l.teacher_name || l.student_name}</td><td>{l.leave_type}</td><td>{l.start_date}</td><td>{l.end_date}</td><td>{l.reason}</td>
+                  <td><Badge status={l.status} /></td>
+                  <td>
+                    {l.status === 'Pending' && (
+                      <>
+                        <button className="btn btn-sm" style={{ background: 'var(--green)', marginRight: 6 }} onClick={() => setStatus(l.id, 'Approved')}>Approve</button>
+                        <button className="btn btn-sm btn-danger" onClick={() => setStatus(l.id, 'Rejected')}>Reject</button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {leaves.length === 0 && <tr><td colSpan="7" className="empty">No leave requests yet.</td></tr>}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============== EXAM TYPES & SCHEDULE ============== */
+function ExamSchedule() {
+  const [exams, loading, err, reload] = useFetch('/exams/exams');
+  const [classes] = useFetch('/academics/classes');
+  const [subjects] = useFetch('/academics/subjects');
+  const [form, setForm] = useState({ name: '', exam_type: 'Unit Test', class_id: '', subject_id: '', exam_date: '', start_time: '', end_time: '', max_marks: 100, pass_marks: 33 });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    await apiCall('/exams/exams', { method: 'POST', body: JSON.stringify(form) });
+    setForm({ name: '', exam_type: 'Unit Test', class_id: '', subject_id: '', exam_date: '', start_time: '', end_time: '', max_marks: 100, pass_marks: 33 });
+    reload();
+  };
+  const del = async (id) => { await apiCall('/exams/exams/' + id, { method: 'DELETE' }); reload(); };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="section-title">Schedule an Exam</div>
+        <form onSubmit={submit}>
+          <div className="form-grid">
+            <div><label>Exam Name</label><input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
+            <div><label>Type</label><select value={form.exam_type} onChange={e => setForm({ ...form, exam_type: e.target.value })}><option>Unit Test</option><option>Mid-Term</option><option>Final</option><option>Practical</option></select></div>
+            <div><label>Class</label><select required value={form.class_id} onChange={e => setForm({ ...form, class_id: e.target.value })}><option value="">Select</option>{classes && classes.map(c => <option key={c.id} value={c.id}>{c.name} - {c.section}</option>)}</select></div>
+            <div><label>Subject</label><select required value={form.subject_id} onChange={e => setForm({ ...form, subject_id: e.target.value })}><option value="">Select</option>{subjects && subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
+            <div><label>Exam Date</label><input required type="date" value={form.exam_date} onChange={e => setForm({ ...form, exam_date: e.target.value })} /></div>
+            <div><label>Start Time</label><input type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} /></div>
+            <div><label>End Time</label><input type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} /></div>
+            <div><label>Max Marks</label><input type="number" value={form.max_marks} onChange={e => setForm({ ...form, max_marks: e.target.value })} /></div>
+            <div><label>Pass Marks</label><input type="number" value={form.pass_marks} onChange={e => setForm({ ...form, pass_marks: e.target.value })} /></div>
+          </div>
+          <button className="btn" type="submit">Schedule Exam</button>
+        </form>
+      </div>
+      <div className="card">
+        {loading ? <div className="loading">Loading...</div> : (
+          <table>
+            <thead><tr><th>Exam</th><th>Type</th><th>Class</th><th>Subject</th><th>Date</th><th>Max/Pass</th><th></th></tr></thead>
+            <tbody>
+              {exams.map(ex => (
+                <tr key={ex.id}>
+                  <td>{ex.name}</td><td>{ex.exam_type}</td><td>{ex.class_name} {ex.section}</td><td>{ex.subject_name}</td><td>{ex.exam_date}</td>
+                  <td>{ex.max_marks}/{ex.pass_marks}</td>
+                  <td><button className="btn btn-sm btn-danger" onClick={() => del(ex.id)}>Delete</button></td>
+                </tr>
+              ))}
+              {exams.length === 0 && <tr><td colSpan="7" className="empty">No exams scheduled yet.</td></tr>}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============== MARKS ENTRY ============== */
+function MarksEntry() {
+  const [exams] = useFetch('/exams/exams');
+  const [selectedExam, setSelectedExam] = useState('');
+  const [results, setResults] = useState([]);
+  const [marksInput, setMarksInput] = useState({});
+
+  const load = () => { if (selectedExam) apiCall('/exams/results/class-summary/' + selectedExam).then(d => setResults(d.results)); };
+  useEffect(load, [selectedExam]);
+
+  const saveMarks = async () => {
+    const exam = exams.find(e => String(e.id) === String(selectedExam));
+    const payload = results.map(r => ({
+      exam_id: Number(selectedExam),
+      student_id: r.student_id,
+      marks_obtained: marksInput[r.student_id] !== undefined ? Number(marksInput[r.student_id]) : (r.marks_obtained || 0)
+    }));
+    await apiCall('/exams/marks', { method: 'POST', body: JSON.stringify(payload) });
+    load();
+    alert('Marks saved for ' + payload.length + ' students.');
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <label>Select Exam</label>
+        <select style={{ maxWidth: 320 }} value={selectedExam} onChange={e => setSelectedExam(e.target.value)}>
+          <option value="">Choose exam</option>
+          {exams && exams.map(ex => <option key={ex.id} value={ex.id}>{ex.name} — {ex.class_name} {ex.section} ({ex.exam_date})</option>)}
+        </select>
+      </div>
+      {results.length > 0 && (
+        <div className="card">
+          <div className="flex-between"><div className="section-title" style={{ margin: 0 }}>Enter Marks</div><button className="btn" onClick={saveMarks}>Save Marks</button></div>
+          <table>
+            <thead><tr><th>Roll No</th><th>Student</th><th>Marks Obtained</th><th>Grade</th></tr></thead>
+            <tbody>
+              {results.map(r => (
+                <tr key={r.student_id}>
+                  <td>{r.roll_no}</td><td>{r.student_name}</td>
+                  <td><input type="number" style={{ maxWidth: 100 }} defaultValue={r.marks_obtained || ''} onChange={e => setMarksInput({ ...marksInput, [r.student_id]: e.target.value })} /></td>
+                  <td>{r.grade ? <Badge status={r.grade} /> : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============== GRADE / RESULT SUMMARY ============== */
+function ResultSummary() {
+  const [students] = useFetch('/academics/students');
+  const [selected, setSelected] = useState('');
+  const [result, setResult] = useState(null);
+  useEffect(() => { if (selected) apiCall('/exams/results/student/' + selected).then(setResult); else setResult(null); }, [selected]);
+  return (
+    <div>
+      <div className="card">
+        <label>Select Student</label>
+        <select id="studentPicker" value={selected} onChange={e => setSelected(e.target.value)}>
+          <option value="">Choose a student</option>{students && students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+      </div>
+      {result && (
+        <div className="card">
+          <div className="stats-grid">
+            <div className="stat-card"><div className="num">{result.summary.overallPercent}%</div><div className="label">Overall Percentage</div></div>
+            <div className="stat-card"><div className="num">{result.summary.overallGrade}</div><div className="label">Overall Grade</div></div>
+            <div className="stat-card"><div className="num"><Badge status={result.summary.result} /></div><div className="label">Result</div></div>
+          </div>
+          <table>
+            <thead><tr><th>Subject</th><th>Exam</th><th>Marks</th><th>Grade</th></tr></thead>
+            <tbody>
+              {result.subjects.map((s, i) => <tr key={i}><td>{s.subject_name}</td><td>{s.exam_name}</td><td>{s.marks_obtained}/{s.max_marks}</td><td><Badge status={s.grade} /></td></tr>)}
+              {result.subjects.length === 0 && <tr><td colSpan="4" className="empty">No results yet.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============== RANK & PERFORMANCE ============== */
+function RankPerformance() {
+  const [exams] = useFetch('/exams/exams');
+  const [selectedExam, setSelectedExam] = useState('');
+  const [ranking, setRanking] = useState([]);
+  useEffect(() => { if (selectedExam) apiCall('/exams/rank/' + selectedExam).then(d => setRanking(d.ranking)); }, [selectedExam]);
+
+  return (
+    <div>
+      <div className="card">
+        <label>Select Exam</label>
+        <select style={{ maxWidth: 320 }} value={selectedExam} onChange={e => setSelectedExam(e.target.value)}>
+          <option value="">Choose exam</option>{exams && exams.map(ex => <option key={ex.id} value={ex.id}>{ex.name} — {ex.class_name} {ex.section}</option>)}
+        </select>
+      </div>
+      <div className="card">
+        <table>
+          <thead><tr><th>Rank</th><th>Roll No</th><th>Student</th><th>Marks</th><th>Grade</th></tr></thead>
+          <tbody>
+            {ranking.map(r => <tr key={r.student_id}><td><b>#{r.rank}</b></td><td>{r.roll_no}</td><td>{r.student_name}</td><td>{r.marks_obtained}</td><td><Badge status={r.grade} /></td></tr>)}
+            {ranking.length === 0 && <tr><td colSpan="5" className="empty">Select an exam to view ranking.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ============== MERIT LIST ============== */
+function MeritList() {
+  const [classes] = useFetch('/academics/classes');
+  const [selectedClass, setSelectedClass] = useState('');
+  const [list, setList] = useState([]);
+  useEffect(() => { if (selectedClass) apiCall('/exams/merit-list/' + selectedClass).then(setList); }, [selectedClass]);
+  return (
+    <div>
+      <div className="card">
+        <label>Class</label>
+        <select style={{ maxWidth: 260 }} value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
+          <option value="">Select class</option>{classes && classes.map(c => <option key={c.id} value={c.id}>{c.name} - {c.section}</option>)}
+        </select>
+      </div>
+      <div className="card">
+        <table>
+          <thead><tr><th>Rank</th><th>Roll No</th><th>Student</th><th>Total Marks</th><th>Percentage</th></tr></thead>
+          <tbody>
+            {list.map(l => <tr key={l.student_id}><td><b>#{l.rank}</b></td><td>{l.roll_no}</td><td>{l.student_name}</td><td>{l.total_obtained}/{l.total_max}</td><td>{l.percent}%</td></tr>)}
+            {list.length === 0 && <tr><td colSpan="5" className="empty">Select a class to view merit list.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ============== REPORT CARD ============== */
+function ReportCard() {
+  const [students] = useFetch('/academics/students');
+  const [selected, setSelected] = useState('');
+  const [card, setCard] = useState(null);
+  useEffect(() => { if (selected) apiCall('/exams/report-card/' + selected).then(setCard); else setCard(null); }, [selected]);
+
+  return (
+    <div>
+      <div className="card">
+        <label>Select Student</label>
+        <select id="studentPicker" value={selected} onChange={e => setSelected(e.target.value)}>
+          <option value="">Choose a student</option>{students && students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+      </div>
+      {card && (
+        <div className="card report-card">
+          <div className="rc-header">
+            <h2 style={{ margin: 0 }}>Report Card</h2>
+            <p style={{ margin: '4px 0', color: 'var(--muted)' }}>Generated on {new Date(card.generatedOn).toLocaleDateString()}</p>
+          </div>
+          <div className="form-grid" style={{ marginBottom: 16 }}>
+            <div><b>Name:</b> {card.student.name}</div>
+            <div><b>Admission No:</b> {card.student.admission_no}</div>
+            <div><b>Class:</b> {card.class.name} - {card.class.section}</div>
+            <div><b>Roll No:</b> {card.student.roll_no}</div>
+          </div>
+          {Object.keys(card.subjects).map(subj => (
+            <div key={subj} style={{ marginBottom: 12 }}>
+              <b style={{ fontSize: 13.5 }}>{subj}</b>
+              <table style={{ marginTop: 4 }}>
+                <thead><tr><th>Exam</th><th>Marks</th><th>Grade</th></tr></thead>
+                <tbody>
+                  {card.subjects[subj].map((m, i) => <tr key={i}><td>{m.exam_name}</td><td>{m.marks_obtained}/{m.max_marks}</td><td><Badge status={m.grade} /></td></tr>)}
+                </tbody>
+              </table>
+            </div>
+          ))}
+          <div className="stats-grid" style={{ marginTop: 16 }}>
+            <div className="stat-card"><div className="num">{card.overall.percent}%</div><div className="label">Overall %</div></div>
+            <div className="stat-card"><div className="num">{card.overall.grade}</div><div className="label">Overall Grade</div></div>
+            <div className="stat-card"><div className="num"><Badge status={card.overall.result} /></div><div className="label">Result</div></div>
+          </div>
+          <b style={{ fontSize: 13.5 }}>Attendance Summary</b>
+          <div className="pill-row" style={{ marginTop: 8 }}>
+            {card.attendance.map((a, i) => <div key={i} style={{ padding: '5px 12px', background: '#f9fafb', borderRadius: 8, fontSize: 13 }}><Badge status={a.status} /> {a.count}</div>)}
+          </div>
+          <button className="btn" style={{ marginTop: 16 }} onClick={() => window.print()}>Print Report Card</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============== NAV / APP SHELL ============== */
+const NAV = [
+  { group: 'Overview', items: [{ key: 'dashboard', label: 'Academic Dashboard' }] },
+  { group: 'Teachers & Academics', items: [
+    { key: 'teachers', label: 'Teacher / Staff Profiles' },
+    { key: 'allocation', label: 'Teacher-Class Allocation' },
+    { key: 'timetable', label: 'Class & Teacher Timetable' },
+    { key: 'homework', label: 'Homework & Assignments' },
+    { key: 'syllabus', label: 'Syllabus / Lesson Plan' },
+    { key: 'calendar', label: 'Academic Calendar' },
+    { key: 'academicinfo', label: 'Marks / Academic Information' },
+  ]},
+  { group: 'Attendance', items: [
+    { key: 'studentattendance', label: 'Daily Student Attendance' },
+    { key: 'correction', label: 'Attendance Correction' },
+    { key: 'attreports', label: 'Attendance Reports' },
+    { key: 'staffattendance', label: 'Teacher / Staff Attendance' },
+    { key: 'leave', label: 'Leave Management' },
+  ]},
+  { group: 'Examination & Results', items: [
+    { key: 'examschedule', label: 'Exam Types & Schedule' },
+    { key: 'marksentry', label: 'Marks Entry' },
+    { key: 'resultsummary', label: 'Grade / Result Summary' },
+    { key: 'rank', label: 'Rank & Performance' },
+    { key: 'meritlist', label: 'Merit List' },
+    { key: 'reportcard', label: 'Report Card Generation' },
+  ]},
+];
+
+const TITLES = {
+  dashboard: 'Academic Dashboard', teachers: 'Teacher / Staff Profiles', allocation: 'Teacher-Class Allocation',
+  timetable: 'Class & Teacher Timetable', homework: 'Homework & Assignments', syllabus: 'Syllabus / Lesson Plan',
+  calendar: 'Academic Calendar', academicinfo: 'Marks / Academic Information',
+  studentattendance: 'Daily Student Attendance', correction: 'Attendance Correction', attreports: 'Attendance Reports',
+  staffattendance: 'Teacher / Staff Attendance', leave: 'Leave Management',
+  examschedule: 'Exam Types & Schedule', marksentry: 'Marks Entry', resultsummary: 'Grade / Result Summary',
+  rank: 'Rank & Performance', meritlist: 'Merit List', reportcard: 'Report Card Generation',
+};
+
+function App() {
+  const [page, setPage] = useState('dashboard');
+
+  const renderPage = () => {
+    switch (page) {
+      case 'dashboard': return <Dashboard />;
+      case 'teachers': return <TeacherProfiles />;
+      case 'allocation': return <Allocation />;
+      case 'timetable': return <Timetable />;
+      case 'homework': return <Homework />;
+      case 'syllabus': return <Syllabus />;
+      case 'calendar': return <Calendar />;
+      case 'academicinfo': return <AcademicInfo />;
+      case 'studentattendance': return <StudentAttendance />;
+      case 'correction': return <AttendanceCorrection />;
+      case 'attreports': return <AttendanceReports />;
+      case 'staffattendance': return <StaffAttendance />;
+      case 'leave': return <LeaveManagement />;
+      case 'examschedule': return <ExamSchedule />;
+      case 'marksentry': return <MarksEntry />;
+      case 'resultsummary': return <ResultSummary />;
+      case 'rank': return <RankPerformance />;
+      case 'meritlist': return <MeritList />;
+      case 'reportcard': return <ReportCard />;
+      default: return <Dashboard />;
+    }
+  };
+
+  return (
+    <>
+      <div className="sidebar">
+        <h1>🏫 School Management<br /><span style={{ fontWeight: 400, color: '#9ca3af' }}>Academics Module</span></h1>
+        {NAV.map(g => (
+          <div key={g.group}>
+            <div className="group-title">{g.group}</div>
+            {g.items.map(it => (
+              <button key={it.key} className={page === it.key ? 'active' : ''} onClick={() => setPage(it.key)}>{it.label}</button>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="main">
+        <div className="topbar">
+          <div>
+            <h2>{TITLES[page]}</h2>
+            <p>Teachers & Academics · Attendance · Examination & Results</p>
+          </div>
+        </div>
+        {renderPage()}
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

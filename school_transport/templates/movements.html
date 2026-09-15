@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">{{ user.role|title }}</p>
+        <h1>Record Student Movement</h1>
+    </div>
+</div>
+
+<div class="form-card">
+    <h2>Add Movement</h2>
+    <form method="POST" action="{{ url_for('movements') }}">
+        <div class="form-grid">
+            <div>
+                <label>Student</label>
+                <select name="student_id" required>
+                    <option value="">-- Select Student --</option>
+                    {% for student in students %}
+                    <option value="{{ student.id }}">{{ student.name }} ({{ student.student_id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label>Status</label>
+                <select name="movement_type" required>
+                    <optgroup label="Transport Status">
+                        <option value="boarding">Boarded</option>
+                        <option value="drop_off">Dropped Off</option>
+                    </optgroup>
+                    <optgroup label="School Gate (optional)">
+                        <option value="school_entry">School Entry</option>
+                        <option value="school_exit">School Exit</option>
+                    </optgroup>
+                </select>
+            </div>
+            {% if user.role == 'admin' %}
+            <div>
+                <label>Vehicle</label>
+                <select name="vehicle_id">
+                    <option value="">-- Optional --</option>
+                    {% for vehicle in vehicles %}
+                    <option value="{{ vehicle.id }}">{{ vehicle.vehicle_number }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label>Route</label>
+                <select name="route_id">
+                    <option value="">-- Optional --</option>
+                    {% for route in routes %}
+                    <option value="{{ route.id }}">{{ route.route_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% else %}
+            <div>
+                <label>Assigned Vehicle</label>
+                <input type="text" value="{{ vehicle.vehicle_number if vehicle else 'No vehicle assigned' }}" readonly>
+            </div>
+            <div>
+                <label>Assigned Route</label>
+                <input type="text" value="{{ route.route_name if route else 'No route assigned' }}" readonly>
+            </div>
+            {% endif %}
+            <div class="full-span"><label>Notes</label><input type="text" name="notes"></div>
+        </div>
+        <button class="primary-btn" type="submit">Record Movement</button>
+    </form>
+</div>
+
+<div class="table-card">
+    <h2>Recent Movement Log</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Movement</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Recorded By</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in records %}
+            <tr>
+                <td>{{ row.student_name }}</td>
+                <td>{{ row.movement_type|movement_label }}</td>
+                <td>{{ row.movement_date }}</td>
+                <td>{{ row.movement_time|time12 }}</td>
+                <td>{{ row.recorded_by_name }}</td>
+                <td>{{ row.notes or '—' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6">No movement records available.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

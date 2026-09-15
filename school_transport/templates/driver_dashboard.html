@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Driver Dashboard - SchoolSafe{% endblock %}
+
+{% block content %}
+{% if vehicle and vehicle.gps_enabled %}
+<div style="background:#FFFDF8;border-radius:14px;padding:18px;margin-bottom:20px;box-shadow:0 10px 30px rgba(15,23,42,.08);">
+  <h3 style="margin-top:0;">📍 Optional GPS Tracking</h3>
+  <p style="color:#8B8477;">GPS is enabled for this vehicle. You can share the phone's location while the trip is active.</p>
+  <button id="gps-start" class="btn-save" type="button">▶ Start Trip GPS</button>
+  <button id="gps-stop" type="button" style="padding:12px 18px;border:1px solid #E7DDC5;border-radius:8px;background:white;cursor:pointer;">■ Stop</button>
+  <span id="gps-status" style="margin-left:10px;font-weight:600;">{{ vehicle.gps_tracking_status|title }}</span>
+</div>
+<script>
+(function(){
+ const status=document.getElementById('gps-status');
+ async function toggle(action){const fd=new FormData();fd.append('action',action);const r=await fetch('{{ url_for("gps_toggle") }}',{method:'POST',body:fd});const d=await r.json();status.textContent=d.ok?d.status:d.message;}
+ document.getElementById('gps-start').onclick=async()=>{
+   if(!navigator.geolocation){status.textContent='GPS unavailable on this device';return;}
+   await toggle('start');
+   navigator.geolocation.watchPosition(async p=>{const fd=new FormData();fd.append('lat',p.coords.latitude);fd.append('lng',p.coords.longitude);try{await fetch('{{ url_for("gps_update") }}',{method:'POST',body:fd});status.textContent='Live';}catch(e){}},()=>{status.textContent='Location permission needed';},{enableHighAccuracy:true,maximumAge:15000,timeout:10000});
+ };
+ document.getElementById('gps-stop').onclick=()=>toggle('stop');
+})();
+</script>
+{% endif %}
+<style>
+    .driver-greeting {
+        background: linear-gradient(135deg, #2F6F5E 0%, #12172B 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    }
+    .driver-greeting h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+    }
+    .driver-greeting p {
+        margin: 0;
+        color: #E3EFE9;
+    }
+    .trip-summary {
+        background: #FFFDF8;
+        border: 2px solid #2F6F5E;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 24px;
+    }
+    .trip-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 1.05rem;
+    }
+    .trip-item:last-child { margin-bottom: 0; }
+    .trip-item strong { color: #12172B; }
+    .trip-label { color: #1B2140; }
+    .student-list {
+        background: #FFFDF8;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+    .student-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1.5fr;
+        gap: 16px;
+        padding: 16px 20px;
+        border-bottom: 1px solid #E7DDC5;
+        align-items: center;
+    }
+    .student-row:last-child { border-bottom: none; }
+    .student-row:hover { background: #FFFDF8; }
+    .student-name {
+        font-weight: 600;
+        color: #12172B;
+    }
+    .student-pickup {
+        color: #8B8477;
+        font-size: 0.9rem;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    .btn-small {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+    .btn-boarded { background: #E3EFE9; color: #256844; }
+    .btn-boarded:hover { background: #DCEFE3; }
+    .btn-not-boarded { background: #F6E4E0; color: #A23B3B; }
+    .btn-not-boarded:hover { background: #F6E4E0; }
+    .btn-dropped { background: #E3EFE9; color: #1B2140; }
+    .btn-dropped:hover { background: #DCEFE3; }
+    .activity-section {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    .activity-item {
+        display: grid;
+        grid-template-columns: 120px 1fr 1fr;
+        gap: 16px;
+        padding: 14px 0;
+        border-bottom: 1px solid #E7DDC5;
+        align-items: center;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-time {
+        font-weight: 700;
+        color: #2F6F5E;
+    }
+    .activity-desc {
+        color: #12172B;
+    }
+    .activity-movement {
+        font-size: 0.9rem;
+        color: #8B8477;
+    }
+    .two-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+    @media (max-width: 1024px) {
+        .two-column { grid-template-columns: 1fr; }
+        .student-row { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="driver-greeting">
+    <h1>Good {{ 'Morning' if now.hour < 12 else 'Afternoon' }}, {{ driver.name }}!</h1>
+    <p>Your assigned vehicle and today's schedule</p>
+</div>
+
+{% if vehicle and route %}
+<div class="trip-summary">
+    <h3 style="margin-top: 0; margin-bottom: 16px; color: #1B2140;">Today's Trip Overview</h3>
+    <div class="trip-item">
+        <span class="trip-label">Vehicle:</span>
+        <strong>{{ vehicle.vehicle_number }} ({{ vehicle.vehicle_type }})</strong>
+    </div>
+    <div class="trip-item">
+        <span class="trip-label">Route:</span>
+        <strong>{{ route.route_name }}</strong>
+    </div>
+    <div class="trip-item">
+        <span class="trip-label">Stops:</span>
+        <strong>{{ route.stops }}</strong>
+    </div>
+</div>
+
+<div class="two-column">
+    <div>
+        <h3 style="margin-top: 0; margin-bottom: 16px;">👥 Today's Students ({{ students_today|length }})</h3>
+        
+        {% if students_today %}
+        <div class="student-list">
+            {% for student in students_today %}
+            <div class="student-row">
+                <div>
+                    <div class="student-name">{{ student.name }}</div>
+                    <div class="student-pickup">📍 {{ route_with_boarding_location(route.route_name, student.pickup_point) if route else student.pickup_point }}</div>
+                </div>
+                <div>
+                    <strong>{{ student.class_section }}</strong>
+                </div>
+                <div style="text-align: center;">
+                    {% if student.latest_movement == 'boarding' %}
+                        <span class="status-badge boarded">✓ Boarded</span>
+                    {% elif student.latest_movement == 'not_travelling' %}
+                        <span class="status-badge not_travelling">🚫 Not Travelling</span>
+                    {% elif student.latest_movement == 'drop_off' %}
+                        <span class="status-badge dropped">✓ Dropped Off</span>
+                    {% else %}
+                        <span class="status-badge waiting">⏳ Waiting</span>
+                    {% endif %}
+                </div>
+                <div class="action-buttons">
+                    <form method="POST" action="{{ url_for('movements') }}" style="display: inline;">
+                        <input type="hidden" name="student_id" value="{{ student.id }}">
+                        <input type="hidden" name="movement_type" value="boarding">
+                        <button type="submit" class="btn-small btn-boarded">Boarded</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('movements') }}" style="display: inline;">
+                        <input type="hidden" name="student_id" value="{{ student.id }}">
+                        <input type="hidden" name="movement_type" value="drop_off">
+                        <button type="submit" class="btn-small btn-dropped">Dropped Off</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="info-card">
+            <p>No students assigned for today.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <h3 style="margin-top: 0; margin-bottom: 16px;">📋 Recent Activity</h3>
+        
+        {% if recent_movements %}
+        <div class="activity-section">
+            {% for movement in recent_movements %}
+            <div class="activity-item">
+                <div class="activity-time">{{ movement.movement_time|time12 }}</div>
+                <div class="activity-desc">
+                    {% set student = students_today|selectattr('id', 'equalto', movement.student_id)|first %}
+                    {% if student %}
+                        {{ student.name }}
+                    {% endif %}
+                </div>
+                <div class="activity-movement">
+                    {% if movement.movement_type == 'boarding' %}
+                        🚌 Boarded
+                    {% elif movement.movement_type == 'drop_off' %}
+                        🏠 Dropped Off
+                    {% elif movement.movement_type == 'school_entry' %}
+                        📚 School Entry
+                    {% elif movement.movement_type == 'school_exit' %}
+                        🚪 School Exit
+                    {% else %}
+                        {{ movement.movement_type }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="info-card">
+            <p>No movements recorded today.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+<div class="info-card" style="grid-column: 1 / -1;">
+    <h3>⚠️ No Vehicle Assigned</h3>
+    <p>You don't have a vehicle assigned to you. Please contact your administrator.</p>
+</div>
+{% endif %}
+
+{% endblock %}

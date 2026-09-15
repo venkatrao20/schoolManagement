@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EduNovae | School Management Hub</title>
+  <style>
+    :root { --ink:#17213b; --muted:#71809c; --line:#e5eaf4; --blue:#4e43c8; --green:#14976f; --amber:#9b6500; --bg:#f7f9fd; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    header { display:flex; align-items:center; gap:22px; padding:10px 24px; background:#fff; border-bottom:1px solid var(--line); }
+    .brand { display:flex; align-items:center; min-width:200px; }
+    .brand-logo { display:block; width:174px; height:80px; object-fit:contain; object-position:center; }
+    nav { display:flex; gap:6px; flex:1; padding:6px; background:#f4f6fb; border-radius:14px; overflow:auto; }
+    nav a { color:#68758e; text-decoration:none; white-space:nowrap; padding:12px 16px; border-radius:10px; font-size:14px; font-weight:650; }
+    nav a.active, nav a:hover { color:#5145c7; background:#fff; box-shadow:0 2px 7px #27345512; }
+    .status { white-space:nowrap; color:var(--amber); background:#fff8e7; border:1px solid #fae0a4; border-radius:24px; padding:11px 16px; font-size:13px; font-weight:700; }
+    .status.ok { color:var(--green); background:#effcf7; border-color:#c8f1df; }
+    main { max-width:1500px; margin:38px auto; padding:0 24px 48px; }
+    .hero { display:flex; justify-content:space-between; align-items:center; gap:28px; padding:48px 40px; border-radius:16px; color:#fff; background:linear-gradient(115deg,#28235f,#4d3fd0); box-shadow:0 14px 26px #3130802b; }
+    .hero h1 { margin:0 0 12px; font-size:36px; letter-spacing:-1.2px; }
+    .hero p { max-width:700px; margin:0; color:#dddfff; font-size:17px; line-height:1.55; }
+    .metrics { display:flex; gap:14px; }
+    .metric { min-width:140px; padding:20px 24px; text-align:center; border:1px solid #ffffff2e; border-radius:12px; background:#ffffff16; }
+    .metric strong { display:block; font-size:29px; }
+    .metric span { color:#c4c5ef; font-size:12px; }
+    h2 { margin:40px 0 20px; font-size:26px; }
+    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+    .card { display:flex; flex-direction:column; min-height:246px; padding:24px; border:1px solid var(--line); border-radius:14px; background:#fff; box-shadow:0 5px 15px #24365d0b; transition:transform .2s,box-shadow .2s; }
+    .card:hover { transform:translateY(-4px); box-shadow:0 14px 28px #24365d1b; }
+    .card-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .icon { display:grid; place-items:center; width:46px; height:46px; border-radius:12px; font-size:24px; background:#edf0ff; }
+    .service-state { color:var(--amber); background:#fff8e7; border-radius:20px; padding:6px 9px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .service-state::before { content:"•"; margin-right:4px; }
+    .service-state.online { color:var(--green); background:#effcf7; }
+    .card h3 { margin:22px 0 8px; font-size:20px; }
+    .card p { margin:0; color:var(--muted); font-size:14px; line-height:1.5; }
+    .open { display:block; margin-top:auto; padding-top:18px; color:#5145c7; text-decoration:none; font-size:14px; font-weight:750; }
+    .open:hover { text-decoration:underline; }
+    .section-heading { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin:42px 0 18px; }
+    .section-heading h2 { margin:0; }
+    .section-heading span, .hint { color:var(--muted); font-size:13px; }
+    .launch { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:20px 22px; border:1px solid #d9d5ff; border-radius:14px; background:#f3f1ff; }
+    .launch strong { display:block; margin-bottom:4px; }
+    code { padding:8px 12px; color:#3a317b; border:1px solid #d9d5ff; border-radius:8px; background:#fff; font:600 13px ui-monospace,SFMono-Regular,Consolas,monospace; white-space:nowrap; }
+    .logins { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+    .login { overflow:hidden; border:1px solid var(--line); border-radius:14px; background:#fff; box-shadow:0 5px 15px #24365d0b; }
+    .login h3 { margin:0; padding:14px 16px; color:#fff; background:#4e43c8; font-size:16px; }
+    .login:nth-child(2) h3 { background:#148b78; } .login:nth-child(3) h3 { background:#c36b29; }
+    .credential { padding:14px 16px; border-bottom:1px solid var(--line); }
+    .credential:last-child { border:0; }
+    .credential small { display:block; margin-bottom:5px; color:#7b879d; font-weight:700; letter-spacing:.3px; text-transform:uppercase; }
+    .credential code { display:block; padding:0; border:0; color:#263454; font-size:13px; white-space:normal; }
+    @media (max-width:1100px) { .grid,.logins { grid-template-columns:repeat(2,1fr); } .status { display:none; } }
+    @media (max-width:720px) { header { flex-wrap:wrap; } .brand { width:100%; justify-content:center; } nav { order:3; flex-basis:100%; } main { margin:22px auto; padding:0 14px 30px; } .hero { display:block; padding:30px 24px; } .hero h1 { font-size:29px; } .metrics { margin-top:24px; } .metric { min-width:0; flex:1; padding:14px 8px; } .grid,.logins { grid-template-columns:1fr; } .launch { align-items:flex-start; flex-direction:column; gap:12px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><img class="brand-logo" src="edunovae-logo.svg" alt="EduNovae, powered by RSR Technologies"></div>
+    <nav aria-label="Modules">
+      <a class="active" href="/">🏠 Hub Overview</a>
+      <a href="http://127.0.0.1:5174">🎓 Admin Portal</a>
+      <a href="http://127.0.0.1:5002">🚌 Transport</a>
+      <a href="http://127.0.0.1:3001">📄 Admissions</a>
+      <a href="http://127.0.0.1:4000">📚 Academics</a>
+      <a href="http://127.0.0.1:5001">🔔 Notifications</a>
+      <a href="http://127.0.0.1:5173">💳 Fee Finance</a>
+    </nav>
+    <div class="status" id="hub-status">Checking services…</div>
+  </header>
+  <main>
+    <section class="hero">
+      <div><h1>Unified School Management Hub</h1><p>Open every school-management module from one place. The Hub checks each service live, so its status always reflects what is actually running.</p></div>
+      <div class="metrics"><div class="metric"><strong id="service-count">0/6</strong><span>SERVICES LIVE</span></div><div class="metric"><strong>7</strong><span>CONFLICT-FREE PORTS</span></div></div>
+    </section>
+    <div class="section-heading"><h2>📦 School modules</h2><span>Click any module to open it in a new workspace tab.</span></div>
+    <section class="grid">
+      <article class="card"><div class="card-top"><div class="icon">🎓</div><span class="service-state" data-status="admin">Offline · 5174</span></div><h3>Admin Portal</h3><p>School information, classes, sections, students, staff, timetable, marks and CSV uploads.</p><a class="open" href="http://127.0.0.1:5174">Open Admin Portal →</a></article>
+      <article class="card"><div class="card-top"><div class="icon">🚌</div><span class="service-state" data-status="transport">Offline · 5002</span></div><h3>School Transport</h3><p>Bus routes, vehicles, driver management, assignments and live boarding tracking.</p><a class="open" href="http://127.0.0.1:5002">Open Transport →</a></article>
+      <article class="card"><div class="card-top"><div class="icon">📄</div><span class="service-state" data-status="admissions">Offline · 3001</span></div><h3>Admissions</h3><p>Student enquiries, applications, assessments, approvals and admission metrics.</p><a class="open" href="http://127.0.0.1:3001">Open Admissions →</a></article>
+      <article class="card"><div class="card-top"><div class="icon">📚</div><span class="service-state" data-status="academics">Offline · 4000</span></div><h3>Academics</h3><p>Teacher assignments, attendance, homework, exams and student report cards.</p><a class="open" href="http://127.0.0.1:4000">Open Academics →</a></article>
+      <article class="card"><div class="card-top"><div class="icon">🔔</div><span class="service-state" data-status="notifications">Offline · 5001</span></div><h3>Notifications</h3><p>Fees, events, attendance alerts, reports and role-based school notifications.</p><a class="open" href="http://127.0.0.1:5001">Open Notifications →</a></article>
+      <article class="card"><div class="card-top"><div class="icon">💳</div><span class="service-state" data-status="fees">Offline · 5173</span></div><h3>Fee Finance</h3><p>Fee structures, payment plans, discounts, student assignments and finance summaries.</p><a class="open" href="http://127.0.0.1:5173">Open Fee Finance →</a></article>
+    </section>
+    <div class="section-heading"><h2>Start the Hub</h2><span>The launcher keeps all module processes in one terminal.</span></div>
+    <section class="launch"><div><strong>From the repository root:</strong><span class="hint">The dashboard is then available at <code>http://127.0.0.1:8080</code>.</span></div><code>cd hub &amp;&amp; npm run start:all</code></section>
+    <div class="section-heading"><h2>🔐 Demo accounts</h2><span>Local-development credentials only.</span></div>
+    <section class="logins">
+      <article class="login"><h3>Admin Portal</h3><div class="credential"><small>Administrator</small><code>admin@test.com / admin123</code></div><div class="credential"><small>Teacher</small><code>teacher5a@test.com / teacher123</code></div></article>
+      <article class="login"><h3>Transport</h3><div class="credential"><small>Administrator</small><code>admin / admin123</code></div><div class="credential"><small>Driver</small><code>driver1 / driver123</code></div></article>
+      <article class="login"><h3>Notifications</h3><div class="credential"><small>Administrator</small><code>admin@example.com / admin123</code></div><div class="credential"><small>Teacher</small><code>rahul@example.com / teacher123</code></div></article>
+    </section>
+  </main>
+  <script>
+    const status = document.getElementById('hub-status');
+    const count = document.getElementById('service-count');
+    async function refreshStatus() {
+      try {
+        const response = await fetch('/api/status', { cache: 'no-store' });
+        if (!response.ok) throw new Error('Status request failed');
+        const data = await response.json();
+        count.textContent = `${data.online}/${data.total}`;
+        status.textContent = data.online === data.total ? '● All services active' : `● ${data.online} of ${data.total} services active`;
+        status.classList.toggle('ok', data.online === data.total);
+        data.modules.forEach((module) => {
+          const badge = document.querySelector(`[data-status="${module.id}"]`);
+          if (!badge) return;
+          badge.textContent = `${module.online ? 'Online' : 'Offline'} · ${module.port}`;
+          badge.classList.toggle('online', module.online);
+        });
+      } catch {
+        status.textContent = '● Hub status unavailable';
+      }
+    }
+    refreshStatus();
+    setInterval(refreshStatus, 10000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}School Transport & Safety Management{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+    <style>
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-badge.boarded { background: #DCEFE3; color: #256844; }
+        .status-badge.waiting { background: #FBECD2; color: #8A5A12; }
+        .status-badge.dropped { background: #E3EFE9; color: #1B2140; }
+        .status-badge.not_travelling { background: #EFE7D6; color: #1E1C17; }
+        .status-badge.school_entry { background: #DCE3F0; color: #2B3570; }
+        .status-badge.school_exit { background: #F3E1E8; color: #7A2E4A; }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        {% if session.get('user_id') %}
+        <aside class="sidebar">
+            <div class="brand-box">
+                <h2>🚌 SchoolSafe</h2>
+            </div>
+            <nav>
+                {% if session.get('role') == 'admin' %}
+                <a href="{{ url_for('dashboard') }}">📊 Dashboard</a>
+                <a href="{{ url_for('students') }}">👥 Students</a>
+                <a href="{{ url_for('vehicles') }}">🚐 Vehicles</a>
+                <a href="{{ url_for('drivers') }}">👨‍✈️ Drivers</a>
+                <a href="{{ url_for('routes') }}">🗺️ Routes</a>
+                <a href="{{ url_for('assignments') }}">📋 Assignments</a>
+                <a href="{{ url_for('movements') }}">✈️ Movements</a>
+                <a href="{{ url_for('school_activity') }}">📚 School Activity</a>
+                <a href="{{ url_for('activity_audit_log') }}">📝 Activity Log</a>
+                <a href="{{ url_for('reports') }}">📊 Reports</a>
+                <a href="{{ url_for('fees') }}">💰 Fees</a>
+                <a href="{{ url_for('users') }}">🔐 User Access</a>
+                {% elif session.get('role') == 'driver' %}
+                <a href="{{ url_for('driver_dashboard') }}">📊 My Dashboard</a>
+                <a href="{{ url_for('movements') }}">✈️ Record Movement</a>
+                <a href="{{ url_for('notifications') }}">🔔 Notifications</a>
+                {% elif session.get('role') == 'parent' %}
+                <a href="{{ url_for('parent_dashboard') }}">👨‍👩‍👧‍👦 My Children</a>
+                <a href="{{ url_for('fees') }}">💰 Fees & Payments</a>
+                <a href="{{ url_for('notifications') }}">🔔 Notifications</a>
+                {% endif %}
+                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
+                <a href="{{ url_for('logout') }}">🚪 Logout</a>
+            </nav>
+        </aside>
+        {% endif %}
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-container">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

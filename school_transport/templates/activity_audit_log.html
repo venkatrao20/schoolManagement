@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}Activity Audit Log - SchoolSafe{% endblock %}
+
+{% block content %}
+<style>
+    .audit-header {
+        background: linear-gradient(135deg, #2F6F5E 0%, #12172B 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    }
+    .audit-header h1 {
+        margin: 0 0 8px;
+        font-size: 1.8rem;
+    }
+    .audit-header p {
+        margin: 0;
+        color: #E3EFE9;
+    }
+    .filter-section {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        margin-bottom: 24px;
+    }
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .filter-input {
+        display: flex;
+        flex-direction: column;
+    }
+    .filter-input label {
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .filter-input input,
+    .filter-input select {
+        padding: 10px 12px;
+        border: 1px solid #E7DDC5;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+    .filter-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    .btn-filter {
+        padding: 10px 16px;
+        background: #2F6F5E;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .btn-filter:hover {
+        background: #275C4E;
+    }
+    .btn-reset {
+        padding: 10px 16px;
+        background: #E7DDC5;
+        color: #12172B;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .btn-reset:hover {
+        background: #DDD3BD;
+    }
+    .activity-table {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        overflow: auto;
+    }
+    .activity-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .activity-table th,
+    .activity-table td {
+        padding: 12px 14px;
+        text-align: left;
+        border-bottom: 1px solid #E7DDC5;
+    }
+    .activity-table th {
+        background: #FFFDF8;
+        font-weight: 600;
+        color: #12172B;
+    }
+    .activity-table tr:hover {
+        background: #FFFDF8;
+    }
+    .action-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .action-login { background: #DCEFE3; color: #256844; }
+    .action-logout { background: #E3EFE9; color: #1B2140; }
+    .action-add { background: #E3EFE9; color: #256844; }
+    .action-update { background: #FBECD2; color: #8A5A12; }
+    .action-delete { background: #F6E4E0; color: #A23B3B; }
+    .action-record { background: #DCE3F0; color: #2B3570; }
+    .no-records {
+        text-align: center;
+        padding: 40px;
+        color: #A2A8C4;
+    }
+    @media (max-width: 768px) {
+        .filter-grid { grid-template-columns: 1fr; }
+        .filter-buttons { flex-direction: column; }
+        .activity-table { overflow-x: auto; }
+    }
+</style>
+
+<div class="audit-header">
+    <h1>📝 Activity Audit Log</h1>
+    <p>Complete record of all system activities and user actions</p>
+</div>
+
+<div class="filter-section">
+    <h3 style="margin-top: 0; margin-bottom: 16px;">🔍 Filters</h3>
+    <form method="GET" action="{{ url_for('activity_audit_log') }}">
+        <div class="filter-grid">
+            <div class="filter-input">
+                <label for="action_filter">Action</label>
+                <input type="text" name="action_filter" id="action_filter" placeholder="e.g., login, add_student" value="{{ action_filter }}">
+            </div>
+            <div class="filter-input">
+                <label for="user_filter">User</label>
+                <input type="text" name="user_filter" id="user_filter" placeholder="User name" value="{{ user_filter }}">
+            </div>
+            <div class="filter-input">
+                <label for="date_filter">Date</label>
+                <input type="date" name="date_filter" id="date_filter" value="{{ date_filter }}">
+            </div>
+        </div>
+        <div class="filter-buttons">
+            <button type="submit" class="btn-filter">🔎 Filter</button>
+            <a href="{{ url_for('activity_audit_log') }}" class="btn-reset" style="display: flex; align-items: center; justify-content: center; text-decoration: none;">↺ Reset</a>
+        </div>
+    </form>
+</div>
+
+<div class="activity-table">
+    {% if records %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Action</th>
+                <th>Student</th>
+                <th>Vehicle</th>
+                <th>Route</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>
+                    <strong>{{ record.action_date }}</strong><br>
+                    <span style="color: #8B8477; font-size: 0.9rem;">{{ record.action_time }}</span>
+                </td>
+                <td><strong>{{ record.user_name }}</strong></td>
+                <td>
+                    {% if record.user_role == 'admin' %}
+                        <span style="background: #DCE3F0; color: #2B3570; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">👨‍💼 Admin</span>
+                    {% elif record.user_role == 'driver' %}
+                        <span style="background: #F3E1E8; color: #7A2E4A; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">👨‍✈️ Driver</span>
+                    {% elif record.user_role == 'parent' %}
+                        <span style="background: #FBECD2; color: #8A5A12; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">👨‍👩‍👧 Parent</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% set action_type = record.action %}
+                    {% if 'login' in action_type.lower() %}
+                        <span class="action-badge action-login">{{ action_type }}</span>
+                    {% elif 'logout' in action_type.lower() %}
+                        <span class="action-badge action-logout">{{ action_type }}</span>
+                    {% elif 'add' in action_type.lower() or 'create' in action_type.lower() %}
+                        <span class="action-badge action-add">{{ action_type }}</span>
+                    {% elif 'update' in action_type.lower() or 'edit' in action_type.lower() %}
+                        <span class="action-badge action-update">{{ action_type }}</span>
+                    {% elif 'delete' in action_type.lower() or 'remove' in action_type.lower() %}
+                        <span class="action-badge action-delete">{{ action_type }}</span>
+                    {% elif 'record' in action_type.lower() or 'boarding' in action_type.lower() or 'drop' in action_type.lower() %}
+                        <span class="action-badge action-record">{{ action_type }}</span>
+                    {% else %}
+                        <span class="action-badge" style="background: #EFE7D6; color: #1E1C17;">{{ action_type }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record.student_id %}
+                        <a href="{{ url_for('student_detail', student_id=record.student_id) }}" style="color: #2F6F5E; text-decoration: none;">View</a>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record.vehicle_id %}
+                        🚐 Linked
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record.route_id %}
+                        🗺️ Linked
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td style="font-size: 0.9rem; color: #8B8477; max-width: 200px;">
+                    {{ record.details or '—' }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-records">
+        <p>No activity records found matching the current filters.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

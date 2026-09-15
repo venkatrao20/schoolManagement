@@ -1,0 +1,12 @@
+body {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  background: #f4f3ef;
+  color: #172522;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+* { box-sizing: border-box; }

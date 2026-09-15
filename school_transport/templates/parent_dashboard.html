@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}Parent Dashboard - SchoolSafe{% endblock %}
+
+{% block content %}
+<style>
+    .parent-greeting {
+        background: linear-gradient(135deg, #2F6F5E 0%, #12172B 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    }
+    .parent-greeting h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+    }
+    .parent-greeting p {
+        margin: 0;
+        color: #E3EFE9;
+    }
+    .child-card {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        border: 2px solid #E7DDC5;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+    }
+    .child-card:hover {
+        border-color: #2F6F5E;
+        box-shadow: 0 15px 40px rgba(29, 78, 216, 0.12);
+    }
+    .child-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #E7DDC5;
+    }
+    .child-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #12172B;
+    }
+    .child-class {
+        color: #8B8477;
+        font-size: 0.95rem;
+    }
+    .not-travelling-badge {
+        background: #F6E4E0;
+        color: #A23B3B;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    .transport-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .detail-item {
+        background: #FFFDF8;
+        padding: 12px;
+        border-radius: 8px;
+    }
+    .detail-label {
+        color: #8B8477;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .detail-value {
+        color: #12172B;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+    .movement-timeline {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #E7DDC5;
+    }
+    .timeline-item {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .timeline-time {
+        font-weight: 700;
+        color: #2F6F5E;
+        min-width: 80px;
+    }
+    .timeline-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .timeline-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #2F6F5E;
+        flex-shrink: 0;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+    }
+    .btn-action {
+        flex: 1;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+    }
+    .btn-not-travelling {
+        background: #FBECD2;
+        color: #8A5A12;
+    }
+    .btn-not-travelling:hover {
+        background: #B8863B;
+    }
+    .btn-view-details {
+        background: #E3EFE9;
+        color: #1B2140;
+    }
+    .btn-view-details:hover {
+        background: #DCEFE3;
+    }
+    .notifications-section {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        margin-top: 24px;
+    }
+    .notification-item {
+        padding: 12px 14px;
+        background: #FFFDF8;
+        border-left: 4px solid #2F6F5E;
+        border-radius: 6px;
+        margin-bottom: 10px;
+    }
+    .notification-item:last-child { margin-bottom: 0; }
+    .notification-time {
+        color: #8B8477;
+        font-size: 0.85rem;
+    }
+    .notification-message {
+        color: #12172B;
+        margin-top: 4px;
+    }
+    .no-children-message {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    .no-children-message h2 {
+        color: #8B8477;
+        margin-bottom: 10px;
+    }
+    .no-children-message p {
+        color: #A2A8C4;
+    }
+    @media (max-width: 768px) {
+        .transport-details { grid-template-columns: 1fr; }
+        .action-buttons { flex-direction: column; }
+    }
+</style>
+
+<div class="parent-greeting">
+    <h1>Welcome, {{ user.name }}!</h1>
+    <p>Monitor your children's transport and school activity</p>
+</div>
+
+{% if children %}
+<h2 style="margin-top: 24px; margin-bottom: 16px;">👨‍👩‍👧‍👦 My Children ({{ children|length }})</h2>
+
+{% for child_data in children %}
+<div class="child-card">
+    <div class="child-header">
+        <div>
+            <div class="child-name">{{ child_data.student.name }}</div>
+            <div class="child-class">📚 {{ child_data.student.class_section }}</div>
+        </div>
+        {% if child_data.not_travelling_today %}
+        <div class="not-travelling-badge">🚫 Not Travelling Today</div>
+        {% endif %}
+    </div>
+
+    {% if child_data.assignment %}
+    {% if child_data.assignment.gps_enabled %}<div style="margin-top:8px;padding:8px 10px;background:#E3EFE9;border-radius:8px;display:inline-block;">📍 Bus GPS: <strong>{{ child_data.assignment.gps_tracking_status|title }}</strong>{% if child_data.assignment.gps_last_updated %} · Updated {{ child_data.assignment.gps_last_updated|datetime12 }}{% endif %}</div>{% endif %}
+    <div class="transport-details">
+        <div class="detail-item">
+            <div class="detail-label">🚌 Vehicle</div>
+            <div class="detail-value">{{ child_data.assignment.vehicle_number }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">👨‍✈️ Driver</div>
+            <div class="detail-value">{{ child_data.assignment.driver_name or 'Not Assigned' }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">📞 Driver Contact</div>
+            <div class="detail-value">{{ child_data.assignment.driver_contact or 'N/A' }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">🗺️ Route</div>
+            <div class="detail-value">{{ route_with_boarding_location(child_data.assignment.route_name, child_data.student.pickup_point) }}</div>
+        </div>
+    </div>
+    {% if child_data.current_transport_status %}
+    <div class="status-badge" style="margin-top: 12px; display: inline-block; padding: 6px 14px; border-radius: 999px; font-weight: 600; font-size: 0.9rem; {% if 'Boarded' in child_data.current_transport_status %}background:#E3EFE9;color:#256844;{% else %}background:#DCEFE3;color:#1B2140;{% endif %}">
+        {{ child_data.current_transport_status }}
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="info-card">
+        <p>No transport assignment yet.</p>
+    </div>
+    {% endif %}
+
+    {% if child_data.movement_summary %}
+    <div class="movement-timeline">
+        <h4 style="margin-top: 0; margin-bottom: 12px;">📋 Today's Timeline</h4>
+        
+        {% if child_data.movement_summary.boarding %}
+        <div class="timeline-item">
+            <div class="timeline-time">{{ child_data.movement_summary.boarding.movement_time|time12 }}</div>
+            <div class="timeline-status">
+                <div class="timeline-dot"></div>
+                <span>🚌 Boarded</span>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if child_data.movement_summary.school_entry %}
+        <div class="timeline-item">
+            <div class="timeline-time">{{ child_data.movement_summary.school_entry.movement_time|time12 }}</div>
+            <div class="timeline-status">
+                <div class="timeline-dot"></div>
+                <span>📚 School Entry</span>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if child_data.movement_summary.school_exit %}
+        <div class="timeline-item">
+            <div class="timeline-time">{{ child_data.movement_summary.school_exit.movement_time|time12 }}</div>
+            <div class="timeline-status">
+                <div class="timeline-dot"></div>
+                <span>🚪 School Exit</span>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if child_data.movement_summary.drop_off %}
+        <div class="timeline-item">
+            <div class="timeline-time">{{ child_data.movement_summary.drop_off.movement_time|time12 }}</div>
+            <div class="timeline-status">
+                <div class="timeline-dot"></div>
+                <span>🏠 Dropped Off</span>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not child_data.movement_summary.boarding and not child_data.movement_summary.school_entry and not child_data.movement_summary.school_exit and not child_data.movement_summary.drop_off %}
+        <p style="color: #A2A8C4; font-size: 0.9rem; margin: 0;">No movements recorded yet.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="action-buttons">
+        <button type="button" class="btn-action btn-not-travelling" onclick="showNotTravellingModal({{ child_data.student.id }}, '{{ child_data.student.name }}')">
+            🚫 Not Travelling Today
+        </button>
+        <a href="{{ url_for('student_detail', student_id=child_data.student.id) }}" class="btn-action btn-view-details" style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
+            📖 View Details
+        </a>
+    </div>
+</div>
+{% endfor %}
+
+{% else %}
+<div class="no-children-message">
+    <h2>👶 No Children Linked</h2>
+    <p>No students are currently linked to your account. Please contact the school administrator.</p>
+</div>
+{% endif %}
+
+{% if notifications %}
+<div class="notifications-section">
+    <h3 style="margin-top: 0; margin-bottom: 16px;">🔔 Recent Notifications</h3>
+    {% for notification in notifications %}
+    <div class="notification-item">
+        <div class="notification-time">{{ notification.created_at }}</div>
+        <div class="notification-message">{{ notification.message }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Modal for Not Travelling Today -->
+<div id="notTravellingModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 30px; border-radius: 14px; width: 90%; max-width: 400px;">
+        <h2 id="modalTitle" style="margin-top: 0;"></h2>
+        <form method="POST" action="{{ url_for('parent_not_travelling_today') }}">
+            <input type="hidden" id="modalStudentId" name="student_id" value="">
+            <div style="margin-bottom: 16px;">
+                <label for="reason">Reason (optional):</label>
+                <select name="reason" id="reason" style="width: 100%; padding: 10px; border: 1px solid #E7DDC5; border-radius: 8px;">
+                    <option value="">Select a reason...</option>
+                    <option value="Not feeling well">Not feeling well</option>
+                    <option value="Personal reason">Personal reason</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="primary-btn" style="flex: 1;">Confirm</button>
+                <button type="button" onclick="closeNotTravellingModal()" style="flex: 1; background: #E7DDC5; color: #12172B; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showNotTravellingModal(studentId, studentName) {
+    document.getElementById('modalTitle').textContent = studentName + ' - Not Travelling Today';
+    document.getElementById('modalStudentId').value = studentId;
+    document.getElementById('notTravellingModal').style.display = 'flex';
+}
+
+function closeNotTravellingModal() {
+    document.getElementById('notTravellingModal').style.display = 'none';
+}
+
+document.getElementById('notTravellingModal').addEventListener('click', function(e) {
+    if (e.target === this) closeNotTravellingModal();
+});
+</script>
+
+{% endblock %}

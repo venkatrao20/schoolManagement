@@ -1,0 +1,430 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String      @id @default(uuid())
+  name         String
+  email        String      @unique
+  passwordHash String
+  role         String      @default("STAFF") // SUPER_ADMIN, ADMIN, STAFF, FINANCE
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Auditing / Decisions
+  createdStudents    Student[]                   @relation("StudentCreatedBy")
+  updatedStudents    Student[]                   @relation("StudentUpdatedBy")
+  decidedAdmissions  Admission[]                 @relation("AdmissionDecidedBy")
+  auditLogs          AuditLog[]
+  createdCategories  FeeCategory[]               @relation("FeeCategoryCreatedBy")
+  updatedCategories  FeeCategory[]               @relation("FeeCategoryUpdatedBy")
+  createdStructures  FeeStructure[]              @relation("FeeStructureCreatedBy")
+  updatedStructures  FeeStructure[]              @relation("FeeStructureUpdatedBy")
+  createdRules       DiscountRule[]              @relation("DiscountRuleCreatedBy")
+  updatedRules       DiscountRule[]              @relation("DiscountRuleUpdatedBy")
+  approvedRules      DiscountRule[]              @relation("DiscountRuleApprovedBy")
+  approvedDiscounts  StudentDiscountAssignment[] @relation("StudentDiscountApprovedBy")
+  createdAssignments FeeAssignment[]             @relation("FeeAssignmentCreatedBy")
+  updatedAssignments FeeAssignment[]             @relation("FeeAssignmentUpdatedBy")
+  createdPaymentPlans PaymentPlan[]              @relation("PaymentPlanCreatedBy")
+  updatedPaymentPlans PaymentPlan[]              @relation("PaymentPlanUpdatedBy")
+
+  @@map("users")
+}
+
+model Student {
+  id              String             @id @default(uuid())
+  admissionNumber String             @unique
+  firstName       String
+  lastName        String
+  dateOfBirth     DateTime
+  gender          String             // MALE, FEMALE, OTHER
+  bloodGroup      String?
+  nationality     String             @default("Indian")
+  address         String
+  phone           String?
+  email           String?
+  photoUrl        String?
+  status          String             @default("APPLIED") // ENQUIRY, APPLIED, ADMITTED, ENROLLED, ALUMNI, WITHDRAWN
+  currentGrade    String             // e.g. "Grade 1", "Grade 5", "Kindergarten"
+  studentCategory String             @default("REGULAR") // REGULAR, RTE, SIBLING, STAFF_CHILD, SCHOLARSHIP, DAY_SCHOLAR, BOARDER
+  academicYear    String?            @default("2026-2027")
+  
+  isDeleted       Boolean            @default(false)
+  deletedAt       DateTime?
+
+  createdById     String?
+  createdBy       User?              @relation("StudentCreatedBy", fields: [createdById], references: [id])
+  updatedById     String?
+  updatedBy       User?              @relation("StudentUpdatedBy", fields: [updatedById], references: [id])
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  // Relationships
+  parents             StudentParentLink[]
+  admissions          Admission[]
+  discountAssignments StudentDiscountAssignment[]
+  feeAssignments      FeeAssignment[]
+
+  @@index([status])
+  @@index([currentGrade])
+  @@index([isDeleted])
+  @@map("students")
+}
+
+model ParentGuardian {
+  id            String              @id @default(uuid())
+  firstName     String
+  lastName      String
+  relationship  String              @default("GUARDIAN") // FATHER, MOTHER, GUARDIAN, OTHER
+  phone         String
+  email         String
+  occupation    String?
+  address       String
+  idProofType   String?             // AADHAAR, PASSPORT, DRIVING_LICENSE, VOTER_ID, OTHER
+  idProofNumber String?
+  
+  isDeleted     Boolean             @default(false)
+  deletedAt     DateTime?
+
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  // Relationships
+  students      StudentParentLink[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([isDeleted])
+  @@map("parents_guardians")
+}
+
+model StudentParentLink {
+  id                 String         @id @default(uuid())
+  studentId          String
+  student            Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  parentGuardianId   String
+  parentGuardian     ParentGuardian @relation(fields: [parentGuardianId], references: [id], onDelete: Cascade)
+  
+  isPrimaryContact   Boolean        @default(false)
+  isEmergencyContact Boolean        @default(false)
+  relationshipNotes  String?
+
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@unique([studentId, parentGuardianId])
+  @@index([studentId])
+  @@index([parentGuardianId])
+  @@map("student_parent_links")
+}
+
+model Admission {
+  id                 String    @id @default(uuid())
+  studentId          String
+  student            Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  applicationDate    DateTime  @default(now())
+  admissionDate      DateTime?
+  academicYear       String    // e.g. "2026-2027"
+  gradeAppliedFor    String    // e.g. "Grade 1"
+  admissionStatus    String    @default("PENDING") // PENDING, UNDER_REVIEW, APPROVED, REJECTED, WAITLISTED, ENROLLED
+  previousSchool     String?
+  documentsSubmitted String?   // JSON string of document names / status
+  remarks            String?
+  
+  decidedById        String?
+  decidedBy          User?     @relation("AdmissionDecidedBy", fields: [decidedById], references: [id])
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([studentId])
+  @@index([admissionStatus])
+  @@index([academicYear])
+  @@map("admissions")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  entityType String   // STUDENT, PARENT, ADMISSION, USER, LINK, FEE_CATEGORY, FEE_STRUCTURE, PAYMENT_PLAN, DISCOUNT_RULE, STUDENT_DISCOUNT, FEE_ASSIGNMENT
+  entityId   String
+  action     String   // CREATE, UPDATE, DELETE, STATUS_CHANGE, LINK, UNLINK, APPROVE, REJECT
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  details    String?  // JSON string
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+// ----------------------------------------------------
+// FEE MANAGEMENT MODULE MODELS
+// ----------------------------------------------------
+
+model FeeCategory {
+  id               String         @id @default(uuid())
+  name             String         @unique
+  code             String         @unique
+  description      String?
+  feeType          String         @default("RECURRING") // RECURRING, ONE_TIME, ANNUAL, SERVICE, OTHER
+  defaultFrequency String         @default("QUARTERLY") // QUARTERLY, FULL_YEAR, ONE_TIME, MONTHLY, HALF_YEARLY
+  isMandatory      Boolean        @default(true)
+  discountAllowed  Boolean        @default(true)
+  isActive         Boolean        @default(true)
+
+  createdById      String?
+  createdBy        User?          @relation("FeeCategoryCreatedBy", fields: [createdById], references: [id])
+  updatedById      String?
+  updatedBy        User?          @relation("FeeCategoryUpdatedBy", fields: [updatedById], references: [id])
+
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  feeStructures     FeeStructure[]
+  feeStructureItems FeeStructureItem[]
+  discountFeeHeads  DiscountFeeHead[]
+
+  @@index([feeType])
+  @@index([defaultFrequency])
+  @@index([isActive])
+  @@map("fee_categories")
+}
+
+model FeeStructure {
+  id              String             @id @default(uuid())
+  name            String             @default("Standard Structure")
+  academicYear    String             // e.g. "2026-2027"
+  gradeOrClass    String             // e.g. "Grade 1", "Grade 5", "Grade 6", "Kindergarten"
+  section         String?            // e.g. "Section A" or null for all sections
+  studentCategory String             @default("REGULAR") // REGULAR, RTE, SIBLING, STAFF_CHILD, DAY_SCHOLAR, BOARDER
+  status          String             @default("ACTIVE") // ACTIVE, INACTIVE, DRAFT, ARCHIVED
+  version         Int                @default(1)
+  effectiveFrom   DateTime?          @default(now())
+  effectiveTo     DateTime?
+  amount          Decimal            @default(0) // Total aggregated annual base amount
+  currency        String             @default("INR")
+  isActive        Boolean            @default(true)
+
+  feeCategoryId   String?
+  feeCategory     FeeCategory?       @relation(fields: [feeCategoryId], references: [id])
+
+  createdById     String?
+  createdBy       User?              @relation("FeeStructureCreatedBy", fields: [createdById], references: [id])
+  updatedById     String?
+  updatedBy       User?              @relation("FeeStructureUpdatedBy", fields: [updatedById], references: [id])
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  items           FeeStructureItem[]
+  paymentPlans    PaymentPlan[]
+  feeAssignments  FeeAssignment[]
+
+  @@index([academicYear])
+  @@index([gradeOrClass])
+  @@index([studentCategory])
+  @@index([status])
+  @@index([isActive])
+  @@map("fee_structures")
+}
+
+model FeeStructureItem {
+  id              String       @id @default(uuid())
+  feeStructureId  String
+  feeStructure    FeeStructure @relation(fields: [feeStructureId], references: [id], onDelete: Cascade)
+  feeCategoryId   String
+  feeCategory     FeeCategory  @relation(fields: [feeCategoryId], references: [id])
+  amount          Decimal      // Head-specific fee amount
+  frequency       String       @default("QUARTERLY") // QUARTERLY, FULL_YEAR, ONE_TIME, MONTHLY, HALF_YEARLY
+  isMandatory     Boolean      @default(true)
+  discountAllowed Boolean      @default(true)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@unique([feeStructureId, feeCategoryId])
+  @@index([feeStructureId])
+  @@index([feeCategoryId])
+  @@map("fee_structure_items")
+}
+
+model PaymentPlan {
+  id                   String                   @id @default(uuid())
+  feeStructureId       String
+  feeStructure         FeeStructure             @relation(fields: [feeStructureId], references: [id], onDelete: Cascade)
+  name                 String                   @default("Standard Plan")
+  type                 String                   @default("QUARTERLY") // QUARTERLY, FULL_YEAR
+  frequency            String                   @default("QUARTERLY") // QUARTERLY, FULL_YEAR
+  installmentCount     Int                      @default(4)
+  numberOfInstallments Int                      @default(4) // Backward-compatibility alias
+  status               String                   @default("ACTIVE") // ACTIVE, INACTIVE, DRAFT, ARCHIVED
+  isActive             Boolean                  @default(true)
+
+  createdById          String?
+  createdBy            User?                    @relation("PaymentPlanCreatedBy", fields: [createdById], references: [id])
+  updatedById          String?
+  updatedBy            User?                    @relation("PaymentPlanUpdatedBy", fields: [updatedById], references: [id])
+
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+
+  installments         PaymentPlanInstallment[]
+  feeAssignments       FeeAssignment[]
+
+  @@index([feeStructureId])
+  @@index([frequency])
+  @@index([status])
+  @@index([isActive])
+  @@map("payment_plans")
+}
+
+model PaymentPlanInstallment {
+  id                String       @id @default(uuid())
+  paymentPlanId     String
+  paymentPlan       PaymentPlan  @relation(fields: [paymentPlanId], references: [id], onDelete: Cascade)
+  sequence          Int          @default(1)
+  installmentNumber Int          @default(1) // Backward-compatibility alias
+  quarter           String?      // e.g. "Q1", "Q2", "Q3", "Q4"
+  dueDate           DateTime?
+  dueMonth          String?      // e.g. "April–June", "July–September", "October–December", "January–March"
+  dueDateRule       String?      // e.g. "10th of April", "10th of July", "10th of October", "10th of January", "On Admission"
+  amount            Decimal      // Split amount for this installment
+  status            String       @default("CONFIGURED") // CONFIGURED, ACTIVE
+
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([paymentPlanId])
+  @@index([quarter])
+  @@map("payment_plan_installments")
+}
+
+model DiscountRule {
+  id                          String                      @id @default(uuid())
+  name                        String                      // e.g. "Early Full-Year Payment Discount", "Sibling Concession"
+  code                        String                      @unique @default(uuid()) // e.g. "EARLY_PAY", "SIBLING_10", "MERIT_25"
+  description                 String?
+  discountType                String                      // PERCENTAGE, FIXED_AMOUNT, FLAT_AMOUNT
+  discountValue               Decimal                     @default(0) // 0-100 for PERCENTAGE, positive amount for FIXED_AMOUNT
+  value                       Decimal                     @default(0) // Backward-compatibility alias
+  paymentOption               String                      @default("ANY") // ANY, FULL_YEAR, QUARTERLY
+  eligibilityType             String                      @default("ALL") // ALL, STUDENT_CATEGORY, CLASS, SIBLING, SCHOLARSHIP, SPECIFIC_STUDENT, CUSTOM
+  eligibilityCriteria         String?                     // Human-readable memo or JSON configuration
+  applicableClasses           String?                     // JSON string array e.g. ["Grade 1", "Grade 2"] or null for all
+  applicableStudentCategories String?                     // JSON string array e.g. ["REGULAR", "SIBLING"] or null for all
+  applicableFeeCategoryIds    String?                     // JSON string array of category IDs, or null if applies to all
+  validFrom                   DateTime                    @default(now())
+  validUntil                  DateTime?
+  validTo                     DateTime?                   // Backward-compatibility alias
+  minimumAmount               Decimal?                    // Minimum applicable fee total required
+  maximumDiscount             Decimal?                    // Cap for percentage-based discount in currency units
+  approvalRequired            Boolean                     @default(false)
+  approvalStatus              String                      @default("APPROVED") // PENDING, APPROVED, REJECTED
+  status                      String                      @default("ACTIVE") // ACTIVE, INACTIVE, PENDING, REJECTED
+  active                      Boolean                     @default(true)
+  isActive                    Boolean                     @default(true) // Backward-compatibility alias
+
+  createdById                 String?
+  createdBy                   User?                       @relation("DiscountRuleCreatedBy", fields: [createdById], references: [id])
+  updatedById                 String?
+  updatedBy                   User?                       @relation("DiscountRuleUpdatedBy", fields: [updatedById], references: [id])
+  approvedById                String?
+  approvedBy                  User?                       @relation("DiscountRuleApprovedBy", fields: [approvedById], references: [id])
+
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
+
+  feeHeads                    DiscountFeeHead[]
+  studentAssignments          StudentDiscountAssignment[]
+
+  @@index([code])
+  @@index([discountType])
+  @@index([paymentOption])
+  @@index([eligibilityType])
+  @@index([approvalStatus])
+  @@index([status])
+  @@index([isActive])
+  @@map("discount_rules")
+}
+
+model DiscountFeeHead {
+  id             String       @id @default(uuid())
+  discountRuleId String
+  discountRule   DiscountRule @relation(fields: [discountRuleId], references: [id], onDelete: Cascade)
+  feeCategoryId  String
+  feeCategory    FeeCategory  @relation(fields: [feeCategoryId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime     @default(now())
+
+  @@unique([discountRuleId, feeCategoryId])
+  @@index([discountRuleId])
+  @@index([feeCategoryId])
+  @@map("discount_fee_heads")
+}
+
+model StudentDiscountAssignment {
+  id             String        @id @default(uuid())
+  studentId      String
+  student        Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  discountRuleId String
+  discountRule   DiscountRule  @relation(fields: [discountRuleId], references: [id], onDelete: Cascade)
+  
+  approvedById   String?
+  approvedBy     User?         @relation("StudentDiscountApprovedBy", fields: [approvedById], references: [id])
+  approvalDate   DateTime?
+  status         String        @default("PENDING") // PENDING, APPROVED, REJECTED, EXPIRED
+  remarks        String?
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([studentId, discountRuleId])
+  @@index([studentId])
+  @@index([discountRuleId])
+  @@index([status])
+  @@map("student_discount_assignments")
+}
+
+model FeeAssignment {
+  id                 String       @id @default(uuid())
+  studentId          String
+  student            Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear       String?      @default("2026-2027")
+  feeStructureId     String
+  feeStructure       FeeStructure @relation(fields: [feeStructureId], references: [id])
+  paymentPlanId      String
+  paymentPlan        PaymentPlan  @relation(fields: [paymentPlanId], references: [id])
+  paymentOption      String       @default("FULL_YEAR") // FULL_YEAR, QUARTERLY
+
+  originalAmount     Decimal      // Snapshot of original fee amount
+  discountApplied    Decimal      // Total discount subtracted
+  finalPayableAmount Decimal      // max(originalAmount - discountApplied, 0)
+  currency           String       @default("INR")
+  status             String       @default("ACTIVE") // ACTIVE, ASSIGNED, PARTIAL, PAID, SUPERSEDED, CANCELLED
+  assignedAt         DateTime     @default(now())
+  calculationDetails String?      // JSON string with detailed discount breakdown & installment snapshot
+
+  createdById        String?
+  createdBy          User?        @relation("FeeAssignmentCreatedBy", fields: [createdById], references: [id])
+  updatedById        String?
+  updatedBy          User?        @relation("FeeAssignmentUpdatedBy", fields: [updatedById], references: [id])
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@index([studentId])
+  @@index([feeStructureId])
+  @@index([academicYear])
+  @@index([status])
+  @@map("fee_assignments")
+}

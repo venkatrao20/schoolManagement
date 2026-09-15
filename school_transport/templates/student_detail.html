@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ student.name }} - SchoolSafe{% endblock %}
+
+{% block content %}
+<style>
+    .student-header {
+        background: linear-gradient(135deg, #2F6F5E 0%, #12172B 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    }
+    .student-header h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+    }
+    .student-header .student-meta {
+        display: flex;
+        gap: 24px;
+        color: #E3EFE9;
+        font-size: 0.95rem;
+    }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+    .info-card {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    .info-card h3 {
+        margin-top: 0;
+        color: #12172B;
+        border-bottom: 2px solid #2F6F5E;
+        padding-bottom: 12px;
+    }
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #E7DDC5;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row label {
+        font-weight: 600;
+        color: #8B8477;
+    }
+    .info-row span {
+        color: #12172B;
+        font-weight: 600;
+    }
+    .movement-table {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    .movement-table h3 {
+        margin-top: 0;
+        color: #12172B;
+    }
+    .movement-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .movement-table th,
+    .movement-table td {
+        padding: 12px 14px;
+        text-align: left;
+        border-bottom: 1px solid #E7DDC5;
+    }
+    .movement-table th {
+        background: #FFFDF8;
+        font-weight: 600;
+        color: #12172B;
+    }
+    .movement-table tr:hover { background: #FFFDF8; }
+    .movement-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .badge-boarded { background: #E3EFE9; color: #256844; }
+    .badge-dropped { background: #DCEFE3; color: #1B2140; }
+    .badge-entry { background: #E3EFE9; color: #1B2140; }
+    .badge-exit { background: #F3E1E8; color: #7A2E4A; }
+    @media (max-width: 1024px) {
+        .info-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="student-header">
+    <h1>👤 {{ student.name }}</h1>
+    <div class="student-meta">
+        <span>📍 {{ student.student_id }}</span>
+        <span>📚 {{ student.class_section }}</span>
+    </div>
+</div>
+
+<div class="info-grid">
+    <div class="info-card">
+        <h3>📋 Student Information</h3>
+        <div class="info-row">
+            <label>Student ID</label>
+            <span>{{ student.student_id }}</span>
+        </div>
+        <div class="info-row">
+            <label>Name</label>
+            <span>{{ student.name }}</span>
+        </div>
+        <div class="info-row">
+            <label>Class / Section</label>
+            <span>{{ student.class_section }}</span>
+        </div>
+        <div class="info-row">
+            <label>Guardian</label>
+            <span>{{ student.parent_name }}</span>
+        </div>
+        <div class="info-row">
+            <label>Contact</label>
+            <span>{{ student.parent_contact }}</span>
+        </div>
+    </div>
+    
+    <div class="info-card">
+        <h3>🚌 Transport Assignment</h3>
+        {% if assignment %}
+        <div class="info-row">
+            <label>Vehicle</label>
+            <span>{{ assignment.vehicle_number }}</span>
+        </div>
+        <div class="info-row">
+            <label>Route</label>
+            <span>{{ route_with_boarding_location(assignment.route_name, student.pickup_point) }}</span>
+        </div>
+        <div class="info-row">
+            <label>Driver</label>
+            <span>{{ assignment.driver_name or 'Not Assigned' }}</span>
+        </div>
+        <div class="info-row">
+            <label>Driver Contact</label>
+            <span>{{ assignment.driver_contact or 'N/A' }}</span>
+        </div>
+        <div class="info-row">
+            <label>Current Status</label>
+            <span>
+                {% if current_transport_status %}
+                    {% if 'Boarded' in current_transport_status %}
+                    <span class="movement-badge badge-boarded">🚌 {{ current_transport_status }}</span>
+                    {% else %}
+                    <span class="movement-badge badge-dropped">🏠 {{ current_transport_status }}</span>
+                    {% endif %}
+                {% else %}
+                    <span style="color: #A2A8C4;">No status recorded yet</span>
+                {% endif %}
+            </span>
+        </div>
+        {% else %}
+        <p style="color: #A2A8C4; padding: 10px 0;">No transport assignment yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="movement-table">
+    <h3>📊 Movement History</h3>
+    {% if movements %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Movement</th>
+                <th>Recorded By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in movements %}
+            <tr>
+                <td><strong>{{ record.movement_date }}</strong></td>
+                <td>{{ record.movement_time|time12 }}</td>
+                <td>
+                    {% set mt = record.movement_type.lower() %}
+                    {% if 'boarding' in mt %}
+                        <span class="movement-badge badge-boarded">🚌 Boarded</span>
+                    {% elif 'drop' in mt %}
+                        <span class="movement-badge badge-dropped">🏠 Dropped</span>
+                    {% elif 'entry' in mt %}
+                        <span class="movement-badge badge-entry">📚 Entry</span>
+                    {% elif 'exit' in mt %}
+                        <span class="movement-badge badge-exit">🚪 Exit</span>
+                    {% else %}
+                        <span class="movement-badge" style="background: #EFE7D6; color: #1E1C17;">{{ record.movement_type|title }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ record.recorded_by_name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #A2A8C4; padding: 20px 0; text-align: center;">No movement records for this student.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

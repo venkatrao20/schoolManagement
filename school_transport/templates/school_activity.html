@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Monitoring</p>
+        <h1>School Activity</h1>
+    </div>
+</div>
+
+<div class="table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Movement</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Recorded By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in records %}
+            <tr>
+                <td>{{ row.student_name }}</td>
+                <td>{{ row.movement_type|replace('_', ' ')|title }}</td>
+                <td>{{ row.movement_date }}</td>
+                <td>{{ row.movement_time|time12 }}</td>
+                <td>{{ row.recorded_by_name }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5">No school activity recorded.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

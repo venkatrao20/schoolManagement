@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Track Vehicle - SchoolSafe{% endblock %}
+{% block content %}
+<style>
+    .tracking-card { background:#FFFDF8; border-radius:14px; padding:22px; box-shadow:0 10px 30px rgba(15,23,42,.08); }
+    #map { height:480px; border-radius:12px; margin-top:18px; }
+    .meta { display:flex; flex-wrap:wrap; gap:12px 28px; color:#4B5563; }
+    .status-live { color:#256844; font-weight:700; }
+    .status-offline { color:#8B8477; font-weight:700; }
+</style>
+<div class="page-header">
+    <div>
+        <p class="eyebrow">GPS Tracking</p>
+        <h1>📍 {{ vehicle.vehicle_number }}</h1>
+    </div>
+</div>
+
+<div class="tracking-card">
+    <div class="meta">
+        <span><strong>Vehicle ID:</strong> {{ vehicle.vehicle_id }}</span>
+        <span><strong>Driver:</strong> {{ vehicle.driver_name or '—' }}</span>
+        <span><strong>Route:</strong> {{ vehicle.route_name or '—' }}</span>
+        <span class="{% if vehicle.gps_tracking_status == 'live' %}status-live{% else %}status-offline{% endif %}">
+            <strong>Status:</strong> {{ vehicle.gps_tracking_status|title }}
+        </span>
+        <span><strong>Last Updated:</strong> {{ vehicle.gps_last_updated or 'No GPS location received yet' }}</span>
+    </div>
+
+    {% if vehicle.gps_last_lat is not none and vehicle.gps_last_lng is not none %}
+    <div id="map"></div>
+    <p style="margin-top:14px;">
+        <a href="https://www.openstreetmap.org/?mlat={{ vehicle.gps_last_lat }}&mlon={{ vehicle.gps_last_lng }}#map=17/{{ vehicle.gps_last_lat }}/{{ vehicle.gps_last_lng }}" target="_blank" rel="noopener">Open current location in map</a>
+    </p>
+    {% else %}
+    <p style="margin-top:24px;color:#8B8477;">No GPS location has been received yet. The assigned driver must start Trip GPS and allow location access.</p>
+    {% endif %}
+    <p><a href="{{ url_for('vehicles') }}">← Back to Vehicle Management</a></p>
+</div>
+
+{% if vehicle.gps_last_lat is not none and vehicle.gps_last_lng is not none %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const lat = {{ vehicle.gps_last_lat|tojson }};
+    const lng = {{ vehicle.gps_last_lng|tojson }};
+    const map = L.map('map').setView([lat, lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    L.marker([lat, lng]).addTo(map).bindPopup({{ vehicle.vehicle_number|tojson }}).openPopup();
+</script>
+{% endif %}
+{% endblock %}

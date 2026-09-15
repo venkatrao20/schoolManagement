@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Transport Fees - SchoolSafe{% endblock %}
+
+{% block content %}
+<style>
+    .fee-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .fee-summary div { background: #FFFDF8; border: 1px solid #E7DDC5; border-radius: 8px; padding: 18px; }
+    .fee-summary span { display: block; color: #8B8477; font-size: .85rem; margin-bottom: 6px; }
+    .fee-summary strong { color: #12172B; font-size: 1.55rem; }
+    .status { display: inline-block; padding: 4px 9px; border-radius: 5px; font-weight: 600; font-size: .82rem; text-transform: capitalize; }
+    .status-paid { background: #E3EFE9; color: #256844; }
+    .status-pending { background: #FBECD2; color: #8A5A12; }
+    .status-partial { background: #E3EFE9; color: #275C4E; }
+    .pay-form { display: grid; grid-template-columns: 140px auto; gap: 8px; align-items: center; min-width: 270px; }
+    .pay-form input, .pay-form select { padding: 8px; }
+    .pay-form button { width: auto; padding: 9px 12px; white-space: nowrap; }
+    .receipt-list { display: grid; gap: 10px; }
+    .receipt { display: flex; justify-content: space-between; gap: 16px; padding: 12px; background: #FFFDF8; border-left: 3px solid #2F6F5E; }
+    @media (max-width: 800px) { .fee-summary { grid-template-columns: 1fr; } .table-card { overflow-x: auto; } .pay-form { grid-template-columns: 1fr; min-width: 160px; } }
+</style>
+
+<div class="page-header">
+    <div>
+        <p class="eyebrow">{{ fee_month }}</p>
+        <h1>{% if user.role == 'admin' %}Transport Fee Collection{% else %}Transport Fees{% endif %}</h1>
+    </div>
+    <form method="get" class="header-meta" style="display:flex; gap:8px; align-items:center;">
+        <label for="plan" style="margin:0; white-space:nowrap;">Payment plan</label>
+        <select id="plan" name="plan" onchange="this.form.submit()" style="padding:7px;">
+            <option value="1" {% if plan_months == 1 %}selected{% endif %}>1 month</option>
+            <option value="3" {% if plan_months == 3 %}selected{% endif %}>3 months</option>
+            <option value="6" {% if plan_months == 6 %}selected{% endif %}>6 months</option>
+        </select>
+    </form>
+</div>
+
+<div class="fee-summary">
+    <div><span>Total billed</span><strong>INR {{ '%.2f'|format(summary.due) }}</strong></div>
+    <div><span>{% if user.role == 'admin' %}Collected{% else %}Paid{% endif %}</span><strong>INR {{ '%.2f'|format(summary.collected) }}</strong></div>
+    <div><span>{% if user.role == 'admin' %}Outstanding accounts{% else %}Outstanding fees{% endif %}</span><strong>{{ summary.pending }}</strong></div>
+</div>
+
+<div class="table-card">
+    <h3>{% if user.role == 'admin' %}Student fee status{% else %}Your children{% endif %}</h3>
+    {% if fee_records %}
+    <table>
+        <thead><tr><th>Student</th><th>Class</th><th>Plan</th><th>Due</th><th>Paid</th><th>Balance</th><th>Status</th>{% if user.role == 'parent' %}<th>Payment</th>{% endif %}</tr></thead>
+        <tbody>
+        {% for fee in fee_records %}
+        <tr>
+            <td><strong>{{ fee.student_name }}</strong><br><small>{{ fee.admission_number }}</small></td>
+            <td>{{ fee.class_section }}</td><td>{{ plan_months }} month{% if plan_months > 1 %}s{% endif %}</td>
+            <td>INR {{ '%.2f'|format(fee.amount_due) }}</td><td>INR {{ '%.2f'|format(fee.amount_paid) }}</td><td>INR {{ '%.2f'|format(fee.balance) }}</td>
+            <td><span class="status status-{{ fee.status }}">{{ fee.status }}</span></td>
+            {% if user.role == 'parent' %}<td>
+                {% if fee.status != 'paid' %}
+                <form class="pay-form" method="post" action="{{ url_for('pay_transport_fee') }}">
+                    <input type="hidden" name="student_id" value="{{ fee.student_db_id }}">
+                    <input type="hidden" name="plan_months" value="{{ plan_months }}">
+                    <select name="payment_method" aria-label="Payment method"><option value="UPI">UPI</option><option value="Card">Card</option><option value="Net Banking">Net Banking</option></select>
+                    <button class="primary-btn" type="submit">Pay INR {{ '%.2f'|format(fee.balance) }}</button>
+                </form>
+                {% else %}<span style="color:#256844; font-weight:600;">Payment complete</span>{% endif %}
+            </td>{% endif %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<p>No fee records are available for this month.</p>{% endif %}
+</div>
+
+{% if user.role == 'admin' %}
+<div class="table-card" style="margin-top:24px;">
+    <h3>Recent payments</h3>
+    {% if payments %}<div class="receipt-list">{% for payment in payments %}
+        <div class="receipt"><div><strong>{{ payment.student_name }}</strong> paid INR {{ '%.2f'|format(payment.amount) }} by {{ payment.payment_method }}<br><small>Paid by {{ payment.paid_by_name }} on {{ payment.paid_at }}</small></div><strong>{{ payment.reference_number }}</strong></div>
+    {% endfor %}</div>{% else %}<p>No payments have been recorded yet.</p>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

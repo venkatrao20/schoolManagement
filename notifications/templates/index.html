@@ -1,0 +1,3461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>School Portal</title>
+<style>
+:root {
+  --bg: #f3f6fb;
+  --surface: #ffffff;
+  --border: #dfe7f3;
+  --text: #172033;
+  --muted: #5d6b82;
+  --accent: #1e3a8a;
+  --accent-soft: #eaf0ff;
+  --danger: #c6284b;
+  --danger-soft: rgba(198, 40, 75, .11);
+  --good: #0d7a6f;
+  --good-soft: rgba(13, 122, 111, .12);
+  --warn: #b76a00;
+  --shadow: 0 10px 24px rgba(23, 32, 51, .06), 0 2px 8px rgba(23, 32, 51, .04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101827;
+    --surface: #162235;
+    --border: #24314d;
+    --text: #edf3ff;
+    --muted: #a7b7d5;
+    --accent: #8ab4ff;
+    --accent-soft: #1c2d4d;
+    --danger: #f0758b;
+    --danger-soft: rgba(240, 117, 139, .14);
+    --good: #6ad8c5;
+    --good-soft: rgba(106, 216, 197, .15);
+    --warn: #f5b75a;
+    --shadow: 0 12px 28px rgba(0, 0, 0, .35);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand {
+  font-weight: 650;
+  font-size: 16px;
+  letter-spacing: -.2px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.spacer { flex: 1; }
+
+.who {
+  text-align: right;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.who .name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.role-chip {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* Shown so it is always obvious which account is signed in */
+.who .email {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 5px;
+}
+
+/* ---------- tabs ---------- */
+
+.nav {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 18px;
+  display: flex;
+  gap: 4px;
+}
+
+.nav button {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--muted);
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.nav button.active {
+  color: var(--accent);
+  font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+
+.subnav {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 18px 8px;
+  display: flex;
+  gap: 5px;
+}
+
+.subnav button {
+  border: none;
+  background: none;
+  color: var(--muted);
+  padding: 5px 9px;
+  font-size: 12px;
+}
+
+.subnav button.active {
+  color: var(--accent);
+  font-weight: 650;
+}
+
+.wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 22px 18px 60px;
+}
+
+/* ---------- buttons ---------- */
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 7px 13px;
+  font-size: 13px;
+}
+
+button:hover { border-color: var(--accent); }
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 550;
+}
+
+.badge {
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 1px 7px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* ---------- toolbar ---------- */
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.pills {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.pills button {
+  border: none;
+  background: none;
+  padding: 5px 12px;
+  border-radius: 6px;
+  color: var(--muted);
+}
+
+.pills button.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+select {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+/* ---------- create form ---------- */
+
+.creator {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow);
+}
+
+.creator.hidden, .hidden { display: none; }
+
+.creator .row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.creator input,
+.creator select,
+.creator textarea {
+  flex: 1;
+  min-width: 140px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.creator textarea { resize: vertical; min-height: 60px; }
+
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+  margin: 5px 0 14px;
+}
+
+.choice-list.hidden { display: none; }
+
+.choice-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.choice-list label.hidden { display: none; }
+
+.choice-list label span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.choice-list input[type="checkbox"] {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+#adminUserChoices {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+#adminUserChoices .admin-user-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  min-height: 40px;
+  box-sizing: border-box;
+  margin: 0 0 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+#adminUserChoices .admin-user-option.hidden { display: none; }
+
+#adminUserChoices .admin-user-option span {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.selected-users {
+  margin: 8px 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  background: var(--bg);
+}
+
+#adminUserSearch {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 8px 0 10px;
+}
+
+.admin-search-label {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.choice-list label:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.admin-detail {
+  padding: 16px;
+}
+
+.admin-detail h2 { margin: 0 0 6px; font-size: 19px; }
+.admin-detail .message { white-space: pre-wrap; margin: 14px 0; }
+.admin-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+.admin-detail-grid div { color: var(--muted); font-size: 12px; }
+.admin-detail-grid strong { display: block; color: var(--text); font-size: 14px; }
+
+/* ---------- notification cards ---------- */
+
+.list { display: flex; flex-direction: column; gap: 10px; }
+
+.card {
+  display: flex;
+  gap: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--tone, var(--muted));
+  border-radius: 11px;
+  padding: 14px 15px;
+  box-shadow: var(--shadow);
+}
+
+.card.read { opacity: .62; }
+
+.icon {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  background: var(--tone-soft, var(--bg));
+}
+
+.body { flex: 1; min-width: 0; }
+
+.title-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.title-line strong { font-weight: 620; font-size: 15px; }
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+}
+
+.type-tag {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--tone, var(--muted));
+  background: var(--tone-soft, var(--bg));
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+
+.msg { margin: 3px 0 0; color: var(--muted); font-size: 14px; }
+
+.meta {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.link.danger { color: var(--danger); }
+.link:hover { border: none; }
+
+/* ---------- reports ---------- */
+
+.report-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.report-head h2 {
+  font-size: 18px;
+  font-weight: 650;
+  margin: 0;
+}
+
+.scope-note { font-size: 12px; color: var(--muted); }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 13px 15px;
+  box-shadow: var(--shadow);
+}
+
+.stat .value {
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -.4px;
+}
+
+.stat .label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.panel-head {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.panel-head strong { font-size: 15px; font-weight: 620; }
+.panel-head .sub { font-size: 12px; color: var(--muted); }
+
+/* Wide tables scroll inside the panel instead of the page */
+.table-scroll { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  padding: 9px 15px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+td {
+  padding: 10px 15px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+tr:last-child td { border-bottom: none; }
+
+td.wrap-text { white-space: normal; min-width: 180px; }
+
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 650;
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+
+.tag.good { color: var(--good); background: var(--good-soft); }
+.tag.bad { color: var(--danger); background: var(--danger-soft); }
+.tag.neutral { color: var(--muted); background: var(--bg); }
+
+/* ---------- attendance register ---------- */
+
+input[type="date"] {
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.register-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.register-row:last-child { border-bottom: none; }
+
+.register-row .student-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 550;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.register-row .no-parent {
+  font-size: 11px;
+  color: var(--warn);
+  font-weight: 500;
+}
+
+/* Present / Absent toggle */
+.toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  flex: none;
+}
+
+.toggle button {
+  border: none;
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--muted);
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.toggle button.on-present {
+  background: var(--good-soft);
+  color: var(--good);
+  font-weight: 650;
+}
+
+.toggle button.on-absent {
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 650;
+}
+
+/* ---------- states ---------- */
+
+.empty, .error, .loading {
+  text-align: center;
+  padding: 44px 20px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+}
+
+.error {
+  color: var(--danger);
+  border-color: var(--danger);
+  border-style: solid;
+}
+
+.toast {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: var(--bg);
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+  z-index: 20;
+}
+
+.toast.show { opacity: 1; }
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 560px) {
+  .topbar-inner, .nav, .wrap { padding-left: 13px; padding-right: 13px; }
+  .topbar-inner { gap: 7px; padding-top: 10px; padding-bottom: 10px; }
+  .brand span.full { display: none; }
+  /* Name and role chip already identify the account on a small screen */
+  .who .email { display: none; }
+  .topbar-inner > #logout { padding: 7px 9px; font-size: 12px; }
+  .nav { overflow-x: auto; scrollbar-width: none; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav button { flex: 0 0 auto; justify-content: center; padding: 10px 11px; min-height: 42px; }
+  .subnav { overflow-x: auto; scrollbar-width: none; white-space: nowrap; }
+  .subnav::-webkit-scrollbar { display: none; }
+  .subnav button { flex: 0 0 auto; min-height: 36px; }
+  .wrap { padding-top: 16px; }
+  .toolbar > select { width: 100%; min-height: 40px; }
+  .toolbar .pills { width: 100%; }
+  .pills button { flex: 1; min-height: 38px; }
+  .creator { padding: 13px; }
+  .creator .row { display: grid; grid-template-columns: 1fr; }
+  .creator input, .creator select, .creator textarea { min-width: 0; width: 100%; min-height: 42px; }
+  .creator button { min-height: 42px; }
+  .choice-list { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); }
+  .stat .value { font-size: 19px; }
+  th, td { padding-left: 11px; padding-right: 11px; }
+  table { min-width: 540px; }
+  .report-head h2 { font-size: 17px; }
+  .toast { left: 13px; right: 13px; transform: none; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">🏫 <span class="full">School Portal</span></div>
+    <div class="spacer"></div>
+    <div class="who">
+      <div class="name" id="userName">...</div>
+      <span class="role-chip" id="userRole"></span>
+      <span class="email" id="userEmail"></span>
+    </div>
+    <button id="logout">Sign out</button>
+  </div>
+  <div class="nav">
+    <button data-view="dashboard" id="dashboardTab">Dashboard</button>
+    <button data-view="notifications" class="active">
+      Notifications <span class="badge hidden" id="unreadBadge">0</span>
+    </button>
+    <button data-view="reports">Reports</button>
+  </div>
+  <div class="subnav hidden" id="notificationSubnav">
+    <button data-notification-view="all" class="active">All Notifications</button>
+    <button data-notification-view="create" id="createNotificationSubnav">Create Notification</button>
+    <button data-notification-view="history" id="historyNotificationSubnav">Notification History</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ notifications ============ -->
+  <section id="notificationsView">
+
+    <div class="toolbar">
+      <div class="pills" id="readFilter">
+        <button data-filter="all" class="active">All</button>
+        <button data-filter="unread">Unread</button>
+      </div>
+      <div class="spacer"></div>
+      <button id="runReminders" class="hidden">Run reminders</button>
+      <button id="enablePushNotifications">Enable phone notifications</button>
+      <button id="toggleCreate">+ New</button>
+      <button id="clearAllNotifications" class="danger">Clear all</button>
+      <button id="refreshNotifications">Refresh</button>
+    </div>
+
+    <div class="creator hidden" id="creator">
+      <div class="row">
+        <input id="newTitle" placeholder="Title" maxlength="80">
+        <select id="newType">
+          <option value="attendance">attendance</option>
+          <option value="grade">grade</option>
+          <option value="assignment">assignment</option>
+          <option value="fee">fee</option>
+          <option value="event">event</option>
+        </select>
+      </div>
+      <div class="row">
+        <textarea id="newMessage" placeholder="Message"></textarea>
+      </div>
+      <div class="row" id="targetRow">
+        <input type="number" id="newUserId" placeholder="Send to user ID" min="1">
+      </div>
+      <div class="row">
+        <div class="spacer"></div>
+        <button id="cancelCreate">Cancel</button>
+        <button class="primary" id="submitCreate">Create</button>
+      </div>
+    </div>
+
+    <div class="list" id="notificationList">
+      <div class="loading">Loading notifications...</div>
+    </div>
+  </section>
+
+  <section id="dashboardView" class="hidden">
+    <div class="report-head">
+      <h2>Dashboard</h2>
+      <span class="scope-note">School activity at a glance</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="value" id="dashboardUnread">0</div><div class="label">Unread notifications</div></div>
+      <div class="stat"><div class="value" id="dashboardUsers">0</div><div class="label">Authorized users</div></div>
+      <div class="stat"><div class="value" id="dashboardReports">0</div><div class="label">Available reports</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><strong>Quick actions</strong></div>
+      <div class="admin-detail">
+        <button class="primary" id="dashboardNotifications">Open Notifications</button>
+        <button id="dashboardReportsButton">View Reports</button>
+      </div>
+    </div>
+    <div class="panel hidden" id="parentTransportPanel">
+      <div class="panel-head">
+        <strong>Children transportation</strong>
+        <span class="sub" id="parentTransportDate"></span>
+      </div>
+      <div id="parentTransportBody"></div>
+    </div>
+  </section>
+
+  <!-- ============ admin notification dashboard ============ -->
+  <section id="adminNotificationsView" class="hidden">
+
+    <div class="toolbar">
+      <div>
+        <div class="report-head" style="margin:0">
+          <h2>Notification Dashboard</h2>
+          <span class="scope-note">sent by this admin</span>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button id="refreshAdminNotifications">Refresh</button>
+      <button class="primary" id="openAdminCreate">+ Create Notification</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="value" id="adminNotificationTotal">0</div><div class="label">Total sent</div></div>
+    </div>
+
+    <div class="creator hidden" id="adminCreator">
+      <div class="report-head">
+        <h2>Create Notification</h2>
+        <span class="scope-note">Send an alert to authorized users</span>
+      </div>
+      <div class="row">
+        <input id="adminTitle" placeholder="Notification Title" maxlength="120">
+        <select id="adminType">
+          <option value="general_announcement">General Announcement</option>
+          <option value="school_event">School Event</option>
+          <option value="holiday">Holiday</option>
+          <option value="examination">Examination</option>
+          <option value="fee_reminder">Fee Reminder</option>
+          <option value="parent_meeting">Parent Meeting</option>
+          <option value="emergency">Emergency</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="row">
+        <textarea id="adminMessage" placeholder="Notification Message" maxlength="2000"></textarea>
+      </div>
+      <div class="row">
+        <select id="adminRecipientScope">
+          <option value="all_authorized_users">All Authorized Users</option>
+          <option value="all_parents">All Parents</option>
+          <option value="all_teachers">All Teachers</option>
+          <option value="specific_users">Specific Users</option>
+        </select>
+        <select id="adminPriority">
+          <option value="normal">Normal</option>
+          <option value="important">Important</option>
+          <option value="urgent">Urgent</option>
+        </select>
+        <select id="adminSendOption">
+          <option value="send_now">Send Now</option>
+          <option value="schedule">Schedule</option>
+        </select>
+      </div>
+      <div class="row hidden" id="scheduleRow">
+        <input type="datetime-local" id="scheduledAt" aria-label="Schedule notification date and time">
+      </div>
+      <div class="scope-note">Choose Specific Users to select a parent.</div>
+      <label class="admin-search-label" for="adminUserSearch">Search specific users</label>
+      <input id="adminUserSearch" type="search" placeholder="Search by name, email, role, or student" aria-label="Search specific users">
+      <div id="adminSpecificUsers" class="hidden">
+        <div id="selectedAdminUsers" class="selected-users">Selected users: none</div>
+        <div id="adminUserChoices" class="choice-list"></div>
+      </div>
+      <div class="row">
+        <div class="spacer"></div>
+        <button id="cancelAdminCreate">Cancel</button>
+        <button class="primary" id="sendAdminNotification">Send Notification</button>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="adminNotificationDetail"></div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <strong>Recipient Rules</strong>
+        <span class="sub">Choose who receives each student notification</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Event</th><th>Parents</th><th>Teachers</th><th>Channel</th><th></th></tr></thead>
+          <tbody id="notificationRulesBody">
+            <tr><td colspan="5" style="color:var(--muted)">Loading recipient rules...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <strong>Notification History</strong>
+        <span class="sub">select a notification to view details</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Title</th><th>Type</th><th>Recipients</th><th>Priority</th><th>Sent</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody id="adminNotificationHistory">
+            <tr><td colspan="7" style="color:var(--muted)">No notifications sent yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ reports ============ -->
+  <section id="reportsView" class="hidden">
+
+    <div class="toolbar">
+      <div class="pills" id="reportPills"></div>
+      <div class="spacer"></div>
+      <select id="studentFilter" class="hidden"></select>
+      <input type="date" id="reportDate" aria-label="Report date">
+    </div>
+
+    <div id="reportBody">
+      <div class="loading">Loading reports...</div>
+    </div>
+  </section>
+
+  <!-- ============ class work (teachers and admins) ============ -->
+  <section id="classworkView" class="hidden">
+
+    <div class="toolbar">
+      <div class="pills" id="classPills">
+        <button data-panel="attendance" id="attendanceClassButton" class="active">Attendance</button>
+        <button data-panel="marks" id="marksClassButton">Marks</button>
+        <button data-panel="transport" id="transportClassButton">Transport</button>
+        <button data-panel="assignments" id="assignmentsClassButton">Assignments</button>
+        <button data-panel="admissions" id="admissionClassButton">Admissions</button>
+        <button data-panel="events" id="eventClassButton">Events</button>
+        <button data-panel="fees" id="feeClassButton">Fees</button>
+      </div>
+    </div>
+
+    <!-- attendance register -->
+    <div id="attendancePanel">
+
+      <div class="panel">
+        <div class="panel-head">
+          <strong>Daily register</strong>
+          <span class="sub">marking a student absent notifies their parent</span>
+          <div class="spacer"></div>
+          <input type="date" id="attendanceDate">
+        </div>
+        <div id="registerBody">
+          <div class="loading">Loading students...</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button id="markAllPresent">Mark all present</button>
+        <div class="spacer"></div>
+        <button class="primary" id="saveAttendance">Save attendance</button>
+      </div>
+    </div>
+
+    <!-- transportation register -->
+    <div id="transportPanel" class="hidden">
+
+      <div class="panel">
+        <div class="panel-head">
+          <strong>Transport register</strong>
+          <span class="sub">not boarded alerts the linked parent</span>
+          <div class="spacer"></div>
+          <input type="date" id="transportDate">
+        </div>
+        <div class="creator" style="box-shadow:none;border:0;border-bottom:1px solid var(--border);margin:0;border-radius:0">
+          <div class="row">
+            <input id="transportRoute" placeholder="Bus route">
+            <input id="transportDestination" placeholder="Destination">
+          </div>
+        </div>
+        <div id="transportBody">
+          <div class="loading">Loading transport statuses...</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="spacer"></div>
+        <button class="primary" id="saveTransportation">Save transport status</button>
+      </div>
+    </div>
+
+    <!-- assignment creation and editing -->
+    <div id="assignmentsPanel" class="hidden">
+
+      <div class="creator">
+        <div class="report-head">
+          <h2 id="assignmentFormTitle">Upload Assignment</h2>
+          <span class="scope-note">parents are notified when details change</span>
+        </div>
+        <div class="row">
+          <select id="assignmentStudent"></select>
+          <input id="assignmentSubject" placeholder="Subject" maxlength="60">
+        </div>
+        <div class="row">
+          <input id="assignmentTitle" placeholder="Assignment title" maxlength="120">
+          <input type="date" id="assignmentDueDate">
+        </div>
+        <div class="row">
+          <textarea id="assignmentDescription" placeholder="Assignment details"></textarea>
+        </div>
+        <div class="row">
+          <div class="spacer"></div>
+          <button id="cancelAssignmentEdit" class="hidden">Cancel edit</button>
+          <button class="primary" id="saveAssignment">Upload assignment</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <strong>Assignment list</strong>
+          <span class="sub">select Edit to update details</span>
+        </div>
+        <div id="assignmentList">
+          <div class="loading">Loading assignments...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- marks entry -->
+    <div id="marksPanel" class="hidden">
+
+      <div class="creator">
+        <div class="row">
+          <select id="markStudent"></select>
+          <input id="markSubject" placeholder="Subject" maxlength="40">
+        </div>
+        <div class="row">
+          <input type="number" id="markScored" placeholder="Marks scored" min="0" step="0.5">
+          <input type="number" id="markTotal" placeholder="Out of" min="1" step="0.5" value="100">
+          <input type="date" id="markDate">
+        </div>
+        <div class="row">
+          <div class="spacer"></div>
+          <button class="primary" id="saveMarks">Save marks</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <strong>Recently saved</strong>
+          <span class="sub">this session</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Subject</th>
+                <th class="num">Marks</th>
+                <th class="num">Percentage</th>
+                <th>Parent notified</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="recentMarks">
+              <tr><td colspan="6" style="color:var(--muted)">Nothing saved yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="admissionsPanel" class="hidden">
+      <div class="creator">
+        <div class="report-head">
+          <h2>Admissions update</h2>
+          <span class="scope-note">linked parents are notified</span>
+        </div>
+        <div class="row">
+          <select id="admissionStudent"></select>
+          <select id="admissionStatus">
+            <option>Applied</option>
+            <option>Under Review</option>
+            <option>Approved</option>
+            <option>Rejected</option>
+            <option>Waitlisted</option>
+          </select>
+        </div>
+        <div class="row">
+          <textarea id="admissionNotes" placeholder="Notes (optional)"></textarea>
+        </div>
+        <div class="row">
+          <div class="spacer"></div>
+          <button class="primary" id="saveAdmission">Save admission status</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="eventsPanel" class="hidden">
+      <div class="creator">
+        <div class="report-head">
+          <h2>School event</h2>
+          <span class="scope-note">linked parents are notified</span>
+        </div>
+        <div class="row">
+          <select id="eventStudent"></select>
+          <input id="eventTitle" placeholder="Event title" maxlength="120">
+        </div>
+        <div class="row">
+          <input type="date" id="eventDate">
+          <input id="eventLocation" placeholder="Location" maxlength="120">
+        </div>
+        <div class="row">
+          <textarea id="eventDescription" placeholder="Description (optional)"></textarea>
+        </div>
+        <div class="row">
+          <div class="spacer"></div>
+          <button class="primary" id="saveEvent">Create event</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="feesPanel" class="hidden">
+      <div class="creator">
+        <div class="report-head">
+          <h2>Fee record</h2>
+          <span class="scope-note">pending fees notify linked parents</span>
+        </div>
+        <div class="row">
+          <select id="feeStudent"></select>
+          <input id="feeType" placeholder="Fee type" maxlength="80">
+        </div>
+        <div class="row">
+          <input type="number" id="feeAmount" placeholder="Amount" min="0" step="0.01">
+          <input type="date" id="feeDueDate">
+          <select id="feeStatus"><option>Pending</option><option>Paid</option></select>
+        </div>
+        <div class="row">
+          <div class="spacer"></div>
+          <button class="primary" id="saveFee">Save fee record</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Look and feel per notification type
+const TYPES = {
+  attendance: { icon: "📋", tone: "#d97706", soft: "rgba(217, 119, 6, .13)" },
+  grade:      { icon: "📊", tone: "#7c3aed", soft: "rgba(124, 58, 237, .13)" },
+  assignment: { icon: "📝", tone: "#2563eb", soft: "rgba(37, 99, 235, .13)" },
+  fee:        { icon: "💰", tone: "#dc2626", soft: "rgba(220, 38, 38, .13)" },
+  event:      { icon: "📅", tone: "#059669", soft: "rgba(5, 150, 105, .13)" },
+  admission:  { icon: "🎓", tone: "#0891b2", soft: "rgba(8, 145, 178, .13)" }
+};
+
+const DEFAULT_TYPE = { icon: "🔔", tone: "#6b7280", soft: "rgba(107, 114, 128, .13)" };
+
+let me = null;
+let notifications = [];
+let readFilter = "all";
+let reportCatalogue = [];
+let activeReport = null;
+let studentFilter = "";
+let reportDate = "";
+let students = [];
+let adminUsers = [];
+
+const ADMIN_TYPE_LABELS = {
+  general_announcement: "General Announcement",
+  school_event: "School Event",
+  holiday: "Holiday",
+  examination: "Examination",
+  fee_reminder: "Fee Reminder",
+  parent_meeting: "Parent Meeting",
+  emergency: "Emergency",
+  other: "Other"
+};
+
+const ADMIN_SCOPE_LABELS = {
+  all_authorized_users: "All Authorized Users",
+  all_parents: "All Parents",
+  all_teachers: "All Teachers",
+  specific_users: "Specific Users"
+};
+
+const toastEl = document.getElementById("toast");
+
+
+// ---------------------------------------------------------------- utilities
+
+
+function showToast(text) {
+  toastEl.textContent = text;
+  toastEl.classList.add("show");
+  setTimeout(() => toastEl.classList.remove("show"), 2200);
+}
+
+
+function escapeHtml(value) {
+  const div = document.createElement("div");
+  div.textContent = value === null || value === undefined ? "" : String(value);
+  return div.innerHTML;
+}
+
+
+// Any 401 means the session has gone, so send the user back to the login page
+async function api(path, options) {
+
+  const response = await fetch(path, options);
+
+  if (response.status === 401) {
+    window.location.href = "/login";
+    throw new Error("Session expired");
+  }
+
+  const body = await response.json().catch(() => ({}));
+
+  // A 403 on a page that was allowed to load usually means somebody signed
+  // in as a different user in another tab, because the session cookie is
+  // shared across the whole browser. Check for that before blaming the
+  // request, otherwise the error reads as if the wrong role is logged in
+  // when the page is simply out of date.
+  if (response.status === 403) {
+    await reloadIfUserChanged();
+  }
+
+  if (!response.ok) {
+    throw new Error(body.error || "Request failed (" + response.status + ")");
+  }
+
+  return body;
+}
+
+
+// Compare the session's current user against the one this page loaded with
+async function reloadIfUserChanged() {
+
+  if (me === null) return;
+
+  const response = await fetch("/api/me");
+
+  if (!response.ok) return;
+
+  const current = await response.json().catch(() => null);
+
+  if (current === null || current.id === me.id) return;
+
+  showToast(
+    "Signed in as " + current.name + " (" + current.role + ") in another tab — reloading"
+  );
+
+  // Give the toast a moment to be readable, then rebuild the page for
+  // whoever is actually signed in
+  setTimeout(() => window.location.reload(), 1800);
+}
+
+
+// SQLite stores CURRENT_TIMESTAMP in UTC, so tag it before parsing
+function timeAgo(timestamp) {
+
+  const then = new Date(timestamp.replace(" ", "T") + "Z");
+  const seconds = (Date.now() - then.getTime()) / 1000;
+
+  if (seconds < 60) return "just now";
+  if (seconds < 3600) return Math.floor(seconds / 60) + "m ago";
+  if (seconds < 86400) return Math.floor(seconds / 3600) + "h ago";
+  if (seconds < 604800) return Math.floor(seconds / 86400) + "d ago";
+
+  return then.toLocaleDateString();
+}
+
+
+function money(amount) {
+  return "₹" + Number(amount).toLocaleString("en-IN", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
+}
+
+
+function percentText(value) {
+  return value === null || value === undefined ? "—" : value.toFixed(2) + "%";
+}
+
+
+function errorBlock(message) {
+  return '<div class="error">' + escapeHtml(message) + "</div>";
+}
+
+
+// ---------------------------------------------------------------- session
+
+
+async function loadMe() {
+
+  me = await api("/api/me");
+
+  document.getElementById("userName").textContent = me.name;
+  document.getElementById("userRole").textContent = me.role;
+  document.getElementById("userEmail").textContent = me.email;
+
+  // Only admins may send notifications to somebody else
+  const isAdmin = me.capabilities.includes("view_all_notifications");
+  document.getElementById("targetRow").classList.toggle("hidden", !isAdmin);
+  document.getElementById("toggleCreate").classList.toggle(
+    "hidden", !me.capabilities.includes("manage_notifications")
+  );
+  document.getElementById("createNotificationSubnav").classList.toggle(
+    "hidden", !me.capabilities.includes("manage_notifications")
+  );
+  document.getElementById("historyNotificationSubnav").classList.toggle(
+    "hidden", !me.capabilities.includes("manage_notifications")
+  );
+  document.getElementById("notificationSubnav").classList.remove("hidden");
+
+  // Only admins may trigger the scheduled reminder jobs
+  document.getElementById("runReminders").classList.toggle(
+    "hidden",
+    !me.capabilities.includes("run_reminders")
+  );
+  document.getElementById("transportClassButton").classList.toggle(
+    "hidden", !me.capabilities.includes("record_transportation")
+  );
+  document.getElementById("attendanceClassButton").classList.toggle(
+    "hidden", !me.capabilities.includes("record_attendance")
+  );
+  document.getElementById("marksClassButton").classList.toggle(
+    "hidden", !me.capabilities.includes("record_grades")
+  );
+  document.getElementById("assignmentsClassButton").classList.toggle(
+    "hidden", !me.capabilities.includes("record_assignments")
+  );
+  document.getElementById("admissionClassButton").classList.toggle(
+    "hidden", !me.capabilities.includes("record_admissions")
+  );
+  document.getElementById("eventClassButton").classList.toggle(
+    "hidden", !me.capabilities.includes("record_events")
+  );
+  document.getElementById("feeClassButton").classList.toggle(
+    "hidden", !me.capabilities.includes("record_fees")
+  );
+
+  const canUseClass = me.capabilities.includes("record_attendance") ||
+    me.capabilities.includes("record_grades") ||
+    me.capabilities.includes("record_transportation") ||
+    me.capabilities.includes("record_assignments") ||
+    me.capabilities.includes("record_admissions") ||
+    me.capabilities.includes("record_events") ||
+    me.capabilities.includes("record_fees");
+
+  let classTab = document.getElementById("classTab");
+  if (canUseClass && !classTab) {
+    classTab = document.createElement("button");
+    classTab.id = "classTab";
+    classTab.dataset.view = "classwork";
+    classTab.textContent = "Class";
+    document.querySelector(".nav").appendChild(classTab);
+    classTab.addEventListener("click", () => {
+      document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+      classTab.classList.add("active");
+      document.getElementById("dashboardView").classList.add("hidden");
+      document.getElementById("notificationsView").classList.add("hidden");
+      document.getElementById("reportsView").classList.add("hidden");
+      document.getElementById("classworkView").classList.remove("hidden");
+      document.getElementById("adminNotificationsView").classList.add("hidden");
+      document.getElementById("notificationSubnav").classList.add("hidden");
+    });
+  }
+
+  if (classTab) {
+    classTab.classList.toggle("hidden", !canUseClass);
+  }
+
+  let dashboardClass = document.getElementById("dashboardClass");
+  if (canUseClass && !dashboardClass) {
+    dashboardClass = document.createElement("button");
+    dashboardClass.id = "dashboardClass";
+    dashboardClass.textContent = "Open Class";
+    document.querySelector(".admin-detail").appendChild(dashboardClass);
+    dashboardClass.addEventListener("click", () => {
+      document.querySelector('[data-view="classwork"]').click();
+    });
+  }
+
+  if (dashboardClass) {
+    dashboardClass.classList.toggle("hidden", !canUseClass);
+  }
+}
+
+
+// ---------------------------------------------------------------- notifications
+
+
+async function loadNotifications() {
+
+  const listEl = document.getElementById("notificationList");
+
+  try {
+    notifications = await api("/notifications/" + me.id);
+    renderNotifications();
+  } catch (error) {
+    listEl.innerHTML = errorBlock(error.message);
+  }
+}
+
+
+function urlBase64ToUint8Array(value) {
+
+  const padding = "=".repeat((4 - value.length % 4) % 4);
+  const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map(character => character.charCodeAt(0)));
+}
+
+
+async function enablePushNotifications() {
+
+  const button = document.getElementById("enablePushNotifications");
+
+  if (window.location.protocol !== "https:" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+    showToast("Push notifications require HTTPS (use Cloudflare tunnel or localhost)");
+    return;
+  }
+
+  if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+    showToast("Push notifications are not supported by this browser/app");
+    return;
+  }
+
+  try {
+    const keyResult = await api("/api/push/public-key");
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      showToast("Notification permission was not granted");
+      return;
+    }
+
+    const registration = await navigator.serviceWorker.register("/service-worker.js");
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(keyResult.public_key)
+      });
+    }
+
+    await api("/api/push/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(subscription.toJSON())
+    });
+    button.textContent = "Phone notifications enabled";
+    button.disabled = true;
+    showToast("Phone notifications enabled");
+  } catch (error) {
+    const errorMessage = String(error.message || error);
+    if (errorMessage.toLowerCase().includes("permission denied")) {
+      showToast("Push notifications are blocked in private or embedded browser mode. Open this portal in a regular Chrome window.");
+      return;
+    }
+    showToast(errorMessage);
+  }
+}
+
+
+async function updateServiceWorker() {
+
+  if (window.location.protocol !== "https:" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+    return;
+  }
+
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.register("/service-worker.js");
+    await registration.update();
+  } catch (error) {}
+}
+
+
+// Remove this browser's push subscription so a different account logging in
+// on the same device does not keep receiving the previous account's pushes
+async function unsubscribeCurrentPush() {
+
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    return;
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.getRegistration();
+    const subscription = registration && await registration.pushManager.getSubscription();
+
+    if (!subscription) {
+      return;
+    }
+
+    await api("/api/push/subscribe", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ endpoint: subscription.endpoint })
+    });
+
+    await subscription.unsubscribe();
+  } catch (error) {}
+}
+
+
+function renderNotifications() {
+
+  const listEl = document.getElementById("notificationList");
+  const badgeEl = document.getElementById("unreadBadge");
+
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  badgeEl.textContent = unreadCount;
+  badgeEl.classList.toggle("hidden", unreadCount === 0);
+
+  const visible = readFilter === "unread"
+    ? notifications.filter(n => !n.is_read)
+    : notifications;
+
+  if (visible.length === 0) {
+    listEl.innerHTML = '<div class="empty">' +
+      (readFilter === "unread" ? "🎉 Nothing unread." : "No notifications yet.") +
+      "</div>";
+    return;
+  }
+
+  listEl.innerHTML = visible.map(notificationCard).join("");
+}
+
+
+function notificationCard(notification) {
+
+  const style = TYPES[notification.type] || DEFAULT_TYPE;
+  const isRead = Boolean(notification.is_read);
+
+  return `
+    <article class="card ${isRead ? "read" : ""}"
+         onclick="openNotification(event, ${notification.id})"
+         tabindex="0"
+             style="--tone:${style.tone};--tone-soft:${style.soft}">
+      <div class="icon">${style.icon}</div>
+      <div class="body">
+        <div class="title-line">
+          ${isRead ? "" : '<span class="dot"></span>'}
+          <strong>${escapeHtml(notification.title)}</strong>
+          <span class="type-tag">${escapeHtml(notification.type)}</span>
+        </div>
+        <p class="msg">${escapeHtml(notification.message)}</p>
+        <div class="meta">
+          <span>${timeAgo(notification.created_at)}</span>
+          ${isRead ? "" : `<button class="link" onclick="markRead(event, ${notification.id})">Mark as read</button>`}
+          <button class="link danger" onclick="removeNotification(event, ${notification.id})">Delete</button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+
+async function openNotification(event, notificationId) {
+
+  if (event.target.closest("button")) return;
+
+  const notification = notifications.find(item => item.id === notificationId);
+
+  if (!notification || notification.is_read) return;
+
+  try {
+    await api("/notifications/" + notificationId + "/read", { method: "PUT" });
+    notification.is_read = 1;
+    renderNotifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function markRead(event, notificationId) {
+
+  event.stopPropagation();
+
+  try {
+    await api("/notifications/" + notificationId + "/read", { method: "PUT" });
+    showToast("Marked as read");
+    loadNotifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function removeNotification(event, notificationId) {
+
+  event.stopPropagation();
+
+  if (!confirm("Delete this notification?")) return;
+
+  try {
+    await api("/notifications/" + notificationId, { method: "DELETE" });
+    showToast("Deleted");
+    loadNotifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function clearAllNotifications() {
+
+  if (!confirm("Delete all notifications for this account?")) return;
+
+  try {
+    await api("/notifications", { method: "DELETE" });
+    showToast("All notifications deleted");
+    loadNotifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function createNotification() {
+
+  const title = document.getElementById("newTitle").value.trim();
+  const message = document.getElementById("newMessage").value.trim();
+  const type = document.getElementById("newType").value;
+  const targetInput = document.getElementById("newUserId").value.trim();
+
+  if (!title || !message) {
+    showToast("Title and message are required");
+    return;
+  }
+
+  const targetUserId = targetInput === "" ? me.id : parseInt(targetInput, 10);
+
+  try {
+    await api("/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: targetUserId,
+        title: title,
+        message: message,
+        type: type
+      })
+    });
+
+    document.getElementById("newTitle").value = "";
+    document.getElementById("newMessage").value = "";
+    document.getElementById("creator").classList.add("hidden");
+
+    showToast("Notification created");
+    loadNotifications();
+
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+// ---------------------------------------------------------------- admin notifications
+
+
+async function loadAdminNotificationUsers() {
+
+  const result = await api("/api/admin/notifications/users");
+  adminUsers = result.users;
+
+  document.getElementById("adminUserChoices").innerHTML = `
+    <label class="admin-user-option">
+      <input type="checkbox" id="selectAllAdminUsers">
+      <strong>Select all users</strong>
+    </label>
+  ` + adminUsers.map(user => `
+    <label class="admin-user-option" data-search="${escapeHtml(
+      [user.name, user.email, user.role, user.student_names].filter(Boolean).join(" ").toLowerCase()
+    )}">
+      <input type="checkbox" class="admin-user-checkbox" value="${user.id}">
+      <span>
+        ${escapeHtml(user.name)} · ${escapeHtml(user.email)} · ${escapeHtml(user.role)}
+        ${user.student_names ? " · student: " + escapeHtml(user.student_names) : ""}
+      </span>
+    </label>
+  `).join("");
+
+  document.getElementById("selectAllAdminUsers").addEventListener("change", (changeEvent) => {
+    document.querySelectorAll(".admin-user-checkbox").forEach(input => {
+      input.checked = changeEvent.target.checked;
+    });
+    updateSelectedAdminUsers();
+  });
+
+  document.querySelectorAll(".admin-user-checkbox").forEach(input => {
+    input.addEventListener("change", updateSelectAllAdminUsers);
+  });
+
+  document.getElementById("adminUserSearch").addEventListener("input", filterAdminUsers);
+
+}
+
+
+function filterAdminUsers() {
+
+  const search = document.getElementById("adminUserSearch").value.trim().toLowerCase();
+
+  document.querySelectorAll(".admin-user-option[data-search]").forEach(option => {
+    option.classList.toggle("hidden", !option.dataset.search.includes(search));
+  });
+}
+
+
+function updateSelectAllAdminUsers() {
+
+  const userInputs = Array.from(document.querySelectorAll(".admin-user-checkbox"));
+  const selectedCount = userInputs.filter(input => input.checked).length;
+  const selectAll = document.getElementById("selectAllAdminUsers");
+
+  selectAll.checked = userInputs.length > 0 && selectedCount === userInputs.length;
+  selectAll.indeterminate = selectedCount > 0 && selectedCount < userInputs.length;
+  updateSelectedAdminUsers();
+}
+
+
+function updateSelectedAdminUsers() {
+
+  const selectedIds = new Set(
+    Array.from(document.querySelectorAll(".admin-user-checkbox:checked"))
+      .map(input => Number(input.value))
+  );
+
+  const selectedUsers = adminUsers.filter(user => selectedIds.has(user.id));
+  const summary = document.getElementById("selectedAdminUsers");
+
+  if (selectedUsers.length === 0) {
+    summary.textContent = "Selected users: none";
+    return;
+  }
+
+  summary.textContent = "Selected users (" + selectedUsers.length + "): " +
+    selectedUsers.map(user => user.name + " · " + user.email).join(", ");
+}
+
+
+function renderAdminRecipients(scope) {
+  document.getElementById("adminSpecificUsers").classList.toggle(
+    "hidden", scope !== "specific_users"
+  );
+}
+
+
+async function loadAdminNotifications() {
+
+  const tbody = document.getElementById("adminNotificationHistory");
+
+  try {
+    const result = await api("/api/admin/notifications");
+    document.getElementById("adminNotificationTotal").textContent = result.total;
+
+    if (result.notifications.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted)">No notifications sent yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = result.notifications.map(notification => `
+      <tr>
+        <td><button class="link" data-admin-detail="${notification.id}">${escapeHtml(notification.title)}</button></td>
+        <td>${escapeHtml(ADMIN_TYPE_LABELS[notification.type] || notification.type)}</td>
+        <td>${escapeHtml(ADMIN_SCOPE_LABELS[notification.recipients] || notification.recipients)} (${notification.recipient_count})</td>
+        <td><span class="tag ${notification.priority === "urgent" ? "bad" : notification.priority === "important" ? "neutral" : "good"}">${escapeHtml(notification.priority)}</span></td>
+        <td>${escapeHtml(notification.created_at)}</td>
+        <td>${escapeHtml(notification.status)}</td>
+        <td><button class="link danger" data-admin-delete="${notification.id}">Delete</button></td>
+      </tr>
+    `).join("");
+
+  } catch (error) {
+    tbody.innerHTML = '<tr><td colspan="7">' + escapeHtml(error.message) + "</td></tr>";
+  }
+}
+
+
+async function loadNotificationRules() {
+
+  const body = document.getElementById("notificationRulesBody");
+
+  try {
+    const result = await api("/api/admin/notification-rules");
+    body.innerHTML = result.rules.map(rule => `
+      <tr>
+        <td>${escapeHtml(ADMIN_TYPE_LABELS[rule.notification_type] || rule.notification_type)}</td>
+        <td><input type="checkbox" data-rule-parent="${escapeHtml(rule.notification_type)}" ${rule.parent_enabled ? "checked" : ""}></td>
+        <td><input type="checkbox" data-rule-teacher="${escapeHtml(rule.notification_type)}" ${rule.teacher_enabled ? "checked" : ""}></td>
+        <td><select data-rule-channel="${escapeHtml(rule.notification_type)}"><option value="in_app" selected>In-app</option></select></td>
+        <td><button class="link" data-rule-save="${escapeHtml(rule.notification_type)}">Save</button></td>
+      </tr>
+    `).join("");
+  } catch (error) {
+    body.innerHTML = '<tr><td colspan="5">' + escapeHtml(error.message) + "</td></tr>";
+  }
+}
+
+
+async function saveNotificationRule(notificationType) {
+
+  const parentEnabled = document.querySelector(`[data-rule-parent="${notificationType}"]`).checked;
+  const teacherEnabled = document.querySelector(`[data-rule-teacher="${notificationType}"]`).checked;
+  const channel = document.querySelector(`[data-rule-channel="${notificationType}"]`).value;
+
+  try {
+    await api("/api/admin/notification-rules/" + encodeURIComponent(notificationType), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        parent_enabled: parentEnabled,
+        teacher_enabled: teacherEnabled,
+        channel: channel
+      })
+    });
+    showToast("Recipient rule updated");
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function showAdminNotificationDetails(notificationId) {
+
+  const detail = document.getElementById("adminNotificationDetail");
+
+  try {
+    const notification = await api("/api/admin/notifications/" + notificationId);
+
+    detail.innerHTML = `
+      <div class="admin-detail">
+        <h2>${escapeHtml(notification.title)}</h2>
+        <div class="admin-detail-grid">
+          <div>Type<strong>${escapeHtml(ADMIN_TYPE_LABELS[notification.type] || notification.type)}</strong></div>
+          <div>Priority<strong>${escapeHtml(notification.priority)}</strong></div>
+          <div>Sender<strong>${escapeHtml(notification.sender)}</strong></div>
+          <div>Sent<strong>${escapeHtml(notification.created_at)}</strong></div>
+          <div>Recipients<strong>${escapeHtml(ADMIN_SCOPE_LABELS[notification.recipients] || notification.recipients)}</strong></div>
+          <div>Read<strong>${notification.read_count} of ${notification.recipient_count}</strong></div>
+          <div>Unread<strong>${notification.unread_count}</strong></div>
+          <div>Status<strong>${escapeHtml(notification.status)}</strong></div>
+        </div>
+        <p class="message">${escapeHtml(notification.message)}</p>
+        <button class="link" id="closeAdminDetail">Close details</button>
+      </div>
+    `;
+    detail.classList.remove("hidden");
+    document.getElementById("closeAdminDetail").addEventListener("click", () => {
+      detail.classList.add("hidden");
+    });
+
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function deleteAdminNotification(notificationId) {
+
+  if (!confirm("Delete this notification for all recipients?")) return;
+
+  try {
+    await api("/api/admin/notifications/" + notificationId, { method: "DELETE" });
+    document.getElementById("adminNotificationDetail").classList.add("hidden");
+    showToast("Notification deleted");
+    loadAdminNotifications();
+    loadNotifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function sendAdminNotification() {
+
+  const title = document.getElementById("adminTitle").value.trim();
+  const message = document.getElementById("adminMessage").value.trim();
+  const recipientScope = document.getElementById("adminRecipientScope").value;
+  const sendOption = document.getElementById("adminSendOption").value;
+  const scheduledAt = document.getElementById("scheduledAt").value;
+  const userIds = Array.from(document.querySelectorAll(".admin-user-checkbox:checked"))
+    .map(input => parseInt(input.value, 10));
+
+  if (!title || !message) {
+    showToast("Title and message are required");
+    return;
+  }
+
+  if (recipientScope === "specific_users" && userIds.length === 0) {
+    showToast("Choose at least one recipient");
+    return;
+  }
+
+  if (sendOption === "schedule" && !scheduledAt) {
+    showToast("Choose a date and time to schedule the notification");
+    return;
+  }
+
+  try {
+    const result = await api("/api/admin/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: title,
+        message: message,
+        notification_type: document.getElementById("adminType").value,
+        recipient_scope: recipientScope,
+        user_ids: userIds,
+        priority: document.getElementById("adminPriority").value,
+        send_option: sendOption,
+        scheduled_at: sendOption === "schedule" ? new Date(scheduledAt).toISOString() : null
+      })
+    });
+
+    document.getElementById("adminTitle").value = "";
+    document.getElementById("adminMessage").value = "";
+    document.getElementById("adminCreator").classList.add("hidden");
+    document.getElementById("scheduleRow").classList.add("hidden");
+    document.getElementById("scheduledAt").value = "";
+    document.querySelectorAll("#adminUserChoices input").forEach(input => {
+      input.checked = false;
+      input.indeterminate = false;
+    });
+    updateSelectedAdminUsers();
+    const sendLabel = result.send_option === "schedule" ? "Scheduled" : "Sent";
+    showToast(sendLabel + " to " + result.recipient_count + " user(s)");
+    loadAdminNotifications();
+
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+// ---------------------------------------------------------------- reports
+
+
+// Build the report pills from what this role is allowed to open
+async function loadReportCatalogue() {
+
+  const catalogue = await api("/api/reports");
+
+  reportCatalogue = catalogue.reports;
+
+  const pillsEl = document.getElementById("reportPills");
+
+  if (reportCatalogue.length === 0) {
+    pillsEl.innerHTML = "";
+    document.getElementById("reportBody").innerHTML =
+      '<div class="empty">Your role has no reports assigned.</div>';
+    return;
+  }
+
+  pillsEl.innerHTML = reportCatalogue.map((report, index) => `
+    <button data-report="${report.key}" class="${index === 0 ? "active" : ""}">
+      ${escapeHtml(report.name.replace(" Report", ""))}
+    </button>
+  `).join("");
+
+  pillsEl.querySelectorAll("button").forEach(button => {
+    button.addEventListener("click", () => {
+      pillsEl.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      button.classList.add("active");
+      activeReport = button.dataset.report;
+      loadReport();
+    });
+  });
+
+  activeReport = reportCatalogue[0].key;
+
+  await buildStudentFilter();
+  await loadReport();
+}
+
+
+// Populate the student dropdown, but only when there is a choice to make
+async function buildStudentFilter() {
+
+  const selectEl = document.getElementById("studentFilter");
+
+  if (!me.student_ids || me.student_ids.length < 2) {
+    selectEl.classList.add("hidden");
+    return;
+  }
+
+  // Student names come from any student based report, so borrow the first one
+  const reportKey = reportCatalogue.find(r => r.key !== "summary");
+
+  if (!reportKey) {
+    selectEl.classList.add("hidden");
+    return;
+  }
+
+  try {
+    const sample = await api("/api/reports/" + reportKey.key);
+
+    students = sample.students.map(student => ({
+      id: student.student_id,
+      name: student.student_name
+    }));
+
+    selectEl.innerHTML =
+      '<option value="">All students (' + students.length + ")</option>" +
+      students.map(student =>
+        `<option value="${student.id}">${escapeHtml(student.name)}</option>`
+      ).join("");
+
+    selectEl.classList.remove("hidden");
+
+  } catch (error) {
+    selectEl.classList.add("hidden");
+  }
+}
+
+
+async function loadReport() {
+
+  const bodyEl = document.getElementById("reportBody");
+
+  if (!activeReport) return;
+
+  bodyEl.innerHTML = '<div class="loading">Loading report...</div>';
+
+  // The school summary is not student scoped
+  const queryValues = new URLSearchParams();
+
+  if (activeReport !== "summary" && studentFilter) {
+    queryValues.set("student_id", studentFilter);
+  }
+
+  if (activeReport !== "summary" && reportDate) {
+    queryValues.set("date_from", reportDate);
+    queryValues.set("date_to", reportDate);
+  }
+
+  const query = queryValues.toString() ? "?" + queryValues.toString() : "";
+
+  try {
+    const report = await api("/api/reports/" + activeReport + query);
+
+    if (activeReport === "summary") {
+      bodyEl.innerHTML = renderSummary(report);
+      document.getElementById("summarySearch").addEventListener("input", filterSummaryStudents);
+    } else if (activeReport === "attendance") {
+      bodyEl.innerHTML = renderAttendance(report);
+    } else if (activeReport === "grades") {
+      bodyEl.innerHTML = renderGrades(report);
+    } else if (activeReport === "assignments") {
+      bodyEl.innerHTML = renderAssignments(report);
+    } else if (activeReport === "fees") {
+      bodyEl.innerHTML = renderFees(report);
+    } else if (activeReport === "admissions") {
+      bodyEl.innerHTML = renderAdmissions(report);
+    }
+
+  } catch (error) {
+    bodyEl.innerHTML = errorBlock(error.message);
+  }
+}
+
+
+function reportHeader(title, note) {
+  return `
+    <div class="report-head">
+      <h2>${escapeHtml(title)}</h2>
+      <span class="scope-note">${escapeHtml(note)}</span>
+    </div>
+  `;
+}
+
+
+function scopeNote(report) {
+
+  const count = report.students ? report.students.length : 0;
+
+  const scope = me.capabilities.includes("view_all_students")
+    ? "all students"
+    : "your children";
+
+  return count + (count === 1 ? " student" : " students") + " · " + scope;
+}
+
+
+function statTile(value, label) {
+  return `<div class="stat"><div class="value">${value}</div><div class="label">${escapeHtml(label)}</div></div>`;
+}
+
+
+function noData(report) {
+  if (!report.students || report.students.length === 0) {
+    return '<div class="empty">No students are linked to your account yet.</div>';
+  }
+  return null;
+}
+
+
+function renderAttendance(report) {
+
+  const blocked = noData(report);
+  if (blocked) return reportHeader("Attendance Report", "") + blocked;
+
+  const rows = report.students.map(student => `
+    <tr>
+      <td>${escapeHtml(student.student_name)}</td>
+      <td class="num">${student.total_classes}</td>
+      <td class="num">${student.present}</td>
+      <td class="num">${student.absent}</td>
+      <td class="num">${percentText(student.percentage)}</td>
+      <td>
+        <span class="tag ${student.status === "Good" ? "good" : student.status === "Low" ? "bad" : "neutral"}">
+          ${escapeHtml(student.status)}
+        </span>
+      </td>
+    </tr>
+  `).join("");
+
+  return reportHeader("Attendance Report", scopeNote(report)) + `
+    <div class="stats">
+      ${statTile(report.summary.students_covered, "Students")}
+      ${statTile(report.summary.below_threshold, "Below " + report.summary.threshold + "%")}
+    </div>
+    <div class="panel">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th class="num">Classes</th>
+              <th class="num">Present</th>
+              <th class="num">Absent</th>
+              <th class="num">Attendance</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+
+function renderGrades(report) {
+
+  const blocked = noData(report);
+  if (blocked) return reportHeader("Grade Report", "") + blocked;
+
+  const panels = report.students.map(student => {
+
+    if (student.grades.length === 0) {
+      return `
+        <div class="panel">
+          <div class="panel-head">
+            <strong>${escapeHtml(student.student_name)}</strong>
+            <span class="sub">no grades recorded</span>
+          </div>
+        </div>
+      `;
+    }
+
+    const rows = student.grades.map(grade => `
+      <tr>
+        <td>${escapeHtml(grade.subject)}</td>
+        <td class="num">${grade.marks} / ${grade.total_marks}</td>
+        <td class="num">${percentText(grade.percentage)}</td>
+        <td><span class="tag ${grade.result === "Pass" ? "good" : "bad"}">${grade.result}</span></td>
+        <td>${escapeHtml(grade.date)}</td>
+        ${me.capabilities.includes("record_grades") ? `
+          <td><button class="link" onclick='editGrade(${JSON.stringify({
+            student_id: student.student_id,
+            subject: grade.subject,
+            marks: grade.marks,
+            total_marks: grade.total_marks,
+            date: grade.date
+          })})'>Edit</button></td>
+        ` : ""}
+      </tr>
+    `).join("");
+
+    return `
+      <div class="panel">
+        <div class="panel-head">
+          <strong>${escapeHtml(student.student_name)}</strong>
+          <span class="sub">
+            ${student.subjects_recorded} subjects · average ${percentText(student.average_percentage)}
+          </span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th class="num">Marks</th>
+                <th class="num">Percentage</th>
+                <th>Result</th>
+                <th>Date</th>
+                ${me.capabilities.includes("record_grades") ? "<th></th>" : ""}
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  return reportHeader("Grade Report", scopeNote(report)) + `
+    <div class="stats">
+      ${statTile(report.summary.students_covered, "Students")}
+      ${statTile(report.summary.below_pass_mark, "Below " + report.summary.pass_mark + "% average")}
+    </div>
+    ${panels}
+  `;
+}
+
+
+function renderAssignments(report) {
+
+  const blocked = noData(report);
+  if (blocked) return reportHeader("Assignment Report", "") + blocked;
+
+  const panels = report.students.map(student => {
+
+    if (student.assignments.length === 0) {
+      return `
+        <div class="panel">
+          <div class="panel-head">
+            <strong>${escapeHtml(student.student_name)}</strong>
+            <span class="sub">no assignments</span>
+          </div>
+        </div>
+      `;
+    }
+
+    const rows = student.assignments.map(assignment => `
+      <tr>
+        <td>${escapeHtml(assignment.subject)}</td>
+        <td class="wrap-text">
+          ${escapeHtml(assignment.title)}
+          <div class="sub" style="font-size:12px;color:var(--muted)">
+            ${escapeHtml(assignment.description || "")}
+          </div>
+        </td>
+        <td>${escapeHtml(assignment.due_date)}</td>
+        <td>
+          <span class="tag ${assignment.overdue ? "bad" : "good"}">
+            ${assignment.overdue ? "Overdue" : "Upcoming"}
+          </span>
+        </td>
+      </tr>
+    `).join("");
+
+    return `
+      <div class="panel">
+        <div class="panel-head">
+          <strong>${escapeHtml(student.student_name)}</strong>
+          <span class="sub">
+            ${student.total_assignments} total ·
+            ${student.overdue_count} overdue ·
+            ${student.upcoming_count} upcoming
+          </span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Assignment</th>
+                <th>Due</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  return reportHeader("Assignment Report", scopeNote(report)) + `
+    <div class="stats">
+      ${statTile(report.summary.students_covered, "Students")}
+      ${statTile(report.summary.overdue_total, "Overdue")}
+    </div>
+    ${panels}
+  `;
+}
+
+
+function renderFees(report) {
+
+  const blocked = noData(report);
+  if (blocked) return reportHeader("Fee Report", "") + blocked;
+
+  const panels = report.students.map(student => {
+
+    if (student.fees.length === 0) {
+      return `
+        <div class="panel">
+          <div class="panel-head">
+            <strong>${escapeHtml(student.student_name)}</strong>
+            <span class="sub">no fee records</span>
+          </div>
+        </div>
+      `;
+    }
+
+    const rows = student.fees.map(fee => {
+
+      const isPaid = fee.status.toLowerCase() === "paid";
+
+      return `
+        <tr>
+          <td>${escapeHtml(fee.fee_type)}</td>
+          <td class="num">${money(fee.amount)}</td>
+          <td>${escapeHtml(fee.due_date)}</td>
+          <td>
+            <span class="tag ${isPaid ? "good" : fee.overdue ? "bad" : "neutral"}">
+              ${isPaid ? "Paid" : fee.overdue ? "Overdue" : escapeHtml(fee.status)}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    return `
+      <div class="panel">
+        <div class="panel-head">
+          <strong>${escapeHtml(student.student_name)}</strong>
+          <span class="sub">
+            ${money(student.pending_amount)} pending ·
+            ${money(student.paid_amount)} paid
+          </span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Fee type</th>
+                <th class="num">Amount</th>
+                <th>Due date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  return reportHeader("Fee Report", scopeNote(report)) + `
+    <div class="stats">
+      ${statTile(money(report.summary.total_pending), "Pending")}
+      ${statTile(money(report.summary.total_paid), "Paid")}
+      ${statTile(report.summary.students_covered, "Students")}
+    </div>
+    ${panels}
+  `;
+}
+
+
+function renderAdmissions(report) {
+
+  const blocked = noData(report);
+  if (blocked) return reportHeader("Admission Report", "") + blocked;
+
+  const statusTag = status => {
+    const tone = status === "Approved" ? "good" : status === "Rejected" ? "bad" : "neutral";
+    return `<span class="tag ${status ? tone : "neutral"}">${escapeHtml(status || "No application")}</span>`;
+  };
+
+  const panels = report.students.map(student => {
+
+    const history = student.history || [];
+
+    if (history.length === 0) {
+      return `
+        <div class="panel">
+          <div class="panel-head">
+            <strong>${escapeHtml(student.student_name)}</strong>
+            <span class="sub">no admission records</span>
+          </div>
+        </div>
+      `;
+    }
+
+    const historyRows = history.map(entry => `
+      <tr>
+        <td>${statusTag(entry.status)}</td>
+        <td>${escapeHtml(entry.notes || "-")}</td>
+        <td>${escapeHtml(entry.updated_at || "-")}</td>
+      </tr>
+    `).join("");
+
+    return `
+      <div class="panel">
+        <div class="panel-head">
+          <strong>${escapeHtml(student.student_name)}</strong>
+          <span class="sub">current status: ${statusTag(student.status)}</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Notes</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody>${historyRows}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  return reportHeader("Admission Report", scopeNote(report)) + `
+    <div class="stats">
+      ${statTile(report.summary.students_covered, "Students")}
+      ${statTile(report.summary.pending_review, "Pending review")}
+    </div>
+    ${panels}
+  `;
+}
+
+
+function renderSummary(summary) {
+
+  const studentRows = summary.students.map(student => `
+    <tr data-summary-student-row>
+      <td>${escapeHtml(student.student_name)}</td>
+      <td>${student.class_level == null ? "Not assigned" : "Class " + escapeHtml(String(student.class_level))}</td>
+      <td>${escapeHtml(student.parent_name || "Not linked")}</td>
+      <td>${escapeHtml(student.parent_email || "-")}</td>
+    </tr>
+  `).join("");
+
+  const roleRows = Object.keys(summary.users_by_role).map(role => `
+    <tr>
+      <td>${escapeHtml(role)}</td>
+      <td class="num">${summary.users_by_role[role]}</td>
+    </tr>
+  `).join("");
+
+  const typeRows = summary.notifications_by_type.map(entry => `
+    <tr>
+      <td>${escapeHtml(entry.type)}</td>
+      <td class="num">${entry.count}</td>
+    </tr>
+  `).join("");
+
+  return reportHeader("School Summary", "whole school · admin only") + `
+    <div class="stats">
+      ${statTile(summary.total_students, "Students")}
+      ${statTile(summary.total_users, "Users")}
+      ${statTile(summary.total_notifications, "Notifications")}
+      ${statTile(summary.unread_notifications, "Unread")}
+      ${statTile(money(summary.outstanding_fees), "Outstanding fees")}
+      ${statTile(summary.total_attendance_records, "Attendance records")}
+      ${statTile(summary.total_grades, "Grades")}
+      ${statTile(summary.total_assignments, "Assignments")}
+      ${statTile(summary.total_events, "Events")}
+    </div>
+    <div class="panel">
+      <div class="panel-head"><strong>Users by role</strong></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Role</th><th class="num">Count</th></tr></thead>
+          <tbody>${roleRows}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <strong>Students and parents</strong>
+        <div class="spacer"></div>
+        <input id="summarySearch" type="search" placeholder="Search student, class, or parent">
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Student</th><th>Class / Grade</th><th>Parent</th><th>Parent email</th></tr></thead>
+          <tbody>${studentRows}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><strong>Notifications by type</strong></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Type</th><th class="num">Count</th></tr></thead>
+          <tbody>${typeRows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+
+function filterSummaryStudents(event) {
+
+  const searchTerm = event.target.value.trim().toLowerCase();
+
+  document.querySelectorAll("[data-summary-student-row]").forEach(row => {
+    row.classList.toggle("hidden", !row.textContent.toLowerCase().includes(searchTerm));
+  });
+}
+
+
+// ---------------------------------------------------------------- class work
+
+
+// Today in the browser's own timezone. toISOString() would use UTC and can
+// land on the wrong day.
+function todayIsoDate() {
+  const now = new Date();
+  const offsetMinutes = now.getTimezoneOffset();
+  return new Date(now.getTime() - offsetMinutes * 60000).toISOString().slice(0, 10);
+}
+
+
+let classStudents = [];
+let register = {};
+let transportRegister = {};
+let editingAssignmentId = null;
+
+
+async function loadClassStudents() {
+
+  const response = await api("/api/students");
+
+  classStudents = response.students;
+
+  const options = '<option value="">Select student</option>' +
+    classStudents.map(student =>
+      `<option value="${student.id}">${escapeHtml(student.name)} (Class ${student.class_level || "-"})</option>`
+    ).join("");
+
+  document.getElementById("markStudent").innerHTML = options;
+  document.getElementById("assignmentStudent").innerHTML = options;
+  document.getElementById("admissionStudent").innerHTML = options;
+  document.getElementById("eventStudent").innerHTML = options;
+  document.getElementById("feeStudent").innerHTML = options;
+}
+
+
+// Load the register for the chosen date and show what is already marked
+async function loadRegister() {
+
+  const bodyEl = document.getElementById("registerBody");
+  const attendanceDate = document.getElementById("attendanceDate").value;
+
+  if (!attendanceDate) return;
+
+  bodyEl.innerHTML = '<div class="loading">Loading register...</div>';
+
+  try {
+    const existing = await api("/api/attendance?date=" + attendanceDate);
+
+    register = {};
+
+    classStudents.forEach(student => {
+      // Default to Present, which is the common case
+      register[student.id] = existing.attendance[String(student.id)] || "Present";
+    });
+
+    renderRegister();
+
+  } catch (error) {
+    bodyEl.innerHTML = errorBlock(error.message);
+  }
+}
+
+
+async function loadTransportation() {
+
+  const bodyEl = document.getElementById("transportBody");
+  const transportDate = document.getElementById("transportDate").value;
+
+  if (!transportDate) return;
+
+  bodyEl.innerHTML = '<div class="loading">Loading transport statuses...</div>';
+
+  try {
+    const existing = await api("/api/transportation?date=" + transportDate);
+    transportRegister = {};
+
+    classStudents.forEach(student => {
+      const saved = existing.transportation[String(student.id)];
+      transportRegister[student.id] = saved || {
+        status: "Boarded",
+        route: "",
+        destination: ""
+      };
+    });
+
+    renderTransportation();
+  } catch (error) {
+    bodyEl.innerHTML = errorBlock(error.message);
+  }
+}
+
+
+function renderTransportation() {
+
+  const bodyEl = document.getElementById("transportBody");
+
+  if (classStudents.length === 0) {
+    bodyEl.innerHTML = '<div class="empty">No students found.</div>';
+    return;
+  }
+
+  bodyEl.innerHTML = classStudents.map(student => {
+    const current = transportRegister[student.id];
+
+    return `
+      <div class="register-row">
+        <div class="student-name">
+          ${escapeHtml(student.name)}
+          ${student.has_parent
+            ? '<div class="sub">Parent: ' + escapeHtml(student.parent_name) + ' · ' + escapeHtml(student.parent_email) + '</div>'
+            : '<span class="no-parent">no parent linked</span>'}
+        </div>
+        <select onchange="setTransportStatus(${student.id}, this.value)">
+          ${["Boarded", "Not Boarded", "Destination Reached"].map(status =>
+            `<option ${current.status === status ? "selected" : ""}>${status}</option>`
+          ).join("")}
+        </select>
+      </div>
+    `;
+  }).join("");
+}
+
+
+function setTransportStatus(studentId, status) {
+  transportRegister[studentId].status = status;
+}
+
+
+async function saveTransportation() {
+
+  const transportDate = document.getElementById("transportDate").value;
+
+  if (!transportDate) {
+    showToast("Pick a date first");
+    return;
+  }
+
+  const route = document.getElementById("transportRoute").value.trim();
+  const destination = document.getElementById("transportDestination").value.trim();
+  const records = classStudents.map(student => ({
+    student_id: student.id,
+    status: transportRegister[student.id].status,
+    route: route,
+    destination: destination
+  }));
+
+  try {
+    const result = await api("/api/transportation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date: transportDate, records: records })
+    });
+
+    showToast(
+      result.saved + " transport status(es) saved · " +
+      result.notifications_sent + " parent notification(s) sent"
+    );
+    loadNotifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function loadAssignmentList() {
+
+  const bodyEl = document.getElementById("assignmentList");
+
+  try {
+    const report = await api("/api/reports/assignments");
+    const rows = [];
+
+    report.students.forEach(student => {
+      student.assignments.forEach(assignment => {
+        rows.push({ ...assignment, student_id: student.student_id, student_name: student.student_name });
+      });
+    });
+
+    if (rows.length === 0) {
+      bodyEl.innerHTML = '<div class="empty">No assignments uploaded yet.</div>';
+      return;
+    }
+
+    bodyEl.innerHTML = `
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Student</th><th>Subject</th><th>Title</th><th>Due date</th><th></th></tr></thead>
+          <tbody>${rows.map(assignment => `
+            <tr>
+              <td>${escapeHtml(assignment.student_name)}</td>
+              <td>${escapeHtml(assignment.subject)}</td>
+              <td class="wrap-text">${escapeHtml(assignment.title)}<div class="sub">${escapeHtml(assignment.description || "")}</div></td>
+              <td>${escapeHtml(assignment.due_date)}</td>
+              <td><button class="link" onclick='editAssignment(${JSON.stringify(assignment)})'>Edit</button></td>
+            </tr>
+          `).join("")}</tbody>
+        </table>
+      </div>
+    `;
+  } catch (error) {
+    bodyEl.innerHTML = errorBlock(error.message);
+  }
+}
+
+
+async function saveAssignment() {
+
+  const studentId = document.getElementById("assignmentStudent").value;
+  const subject = document.getElementById("assignmentSubject").value.trim();
+  const title = document.getElementById("assignmentTitle").value.trim();
+  const description = document.getElementById("assignmentDescription").value.trim();
+  const dueDate = document.getElementById("assignmentDueDate").value;
+
+  if (!studentId || !subject || !title || !dueDate) {
+    showToast("Student, subject, title, and due date are required");
+    return;
+  }
+
+  const payload = {
+    subject: subject,
+    title: title,
+    description: description,
+    due_date: dueDate
+  };
+
+  try {
+    const path = editingAssignmentId
+      ? "/api/assignments/" + editingAssignmentId
+      : "/api/assignments";
+    const method = editingAssignmentId ? "PUT" : "POST";
+
+    if (!editingAssignmentId) {
+      payload.student_id = parseInt(studentId, 10);
+    }
+
+    const result = await api(path, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    showToast(
+      result.changed ? "Assignment saved · parent notified" : "No changes to save"
+    );
+    resetAssignmentForm();
+    loadAssignmentList();
+    loadNotifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function saveAdmission() {
+
+  const studentId = document.getElementById("admissionStudent").value;
+  const status = document.getElementById("admissionStatus").value;
+  const notes = document.getElementById("admissionNotes").value.trim();
+
+  if (!studentId) {
+    showToast("Select a student first");
+    return;
+  }
+
+  try {
+    const result = await api("/api/admissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        student_id: parseInt(studentId, 10),
+        status: status,
+        notes: notes
+      })
+    });
+    showToast(result.changed ? "Admission saved · parent notified" : "No changes to save");
+    document.getElementById("admissionNotes").value = "";
+    loadNotifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function saveEvent() {
+
+  const studentId = document.getElementById("eventStudent").value;
+  const title = document.getElementById("eventTitle").value.trim();
+  const eventDate = document.getElementById("eventDate").value;
+  const location = document.getElementById("eventLocation").value.trim();
+  const description = document.getElementById("eventDescription").value.trim();
+
+  if (!studentId || !title || !eventDate || !location) {
+    showToast("Student, title, date, and location are required");
+    return;
+  }
+
+  try {
+    const result = await api("/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        student_id: parseInt(studentId, 10),
+        title: title,
+        event_date: eventDate,
+        location: location,
+        description: description
+      })
+    });
+    showToast("Event saved · parent notified");
+    document.getElementById("eventTitle").value = "";
+    document.getElementById("eventLocation").value = "";
+    document.getElementById("eventDescription").value = "";
+    loadNotifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function saveFee() {
+
+  const studentId = document.getElementById("feeStudent").value;
+  const feeType = document.getElementById("feeType").value.trim();
+  const amount = document.getElementById("feeAmount").value;
+  const dueDate = document.getElementById("feeDueDate").value;
+  const status = document.getElementById("feeStatus").value;
+
+  if (!studentId || !feeType || amount === "" || !dueDate) {
+    showToast("Student, fee type, amount, and due date are required");
+    return;
+  }
+
+  try {
+    const result = await api("/api/fees", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        student_id: parseInt(studentId, 10),
+        fee_type: feeType,
+        amount: parseFloat(amount),
+        due_date: dueDate,
+        status: status
+      })
+    });
+    showToast(result.notifications_sent ? "Fee saved · parent notified" : "Fee saved");
+    document.getElementById("feeType").value = "";
+    document.getElementById("feeAmount").value = "";
+    loadNotifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+function editAssignment(assignment) {
+
+  editingAssignmentId = assignment.id;
+  document.getElementById("assignmentStudent").value = String(assignment.student_id);
+  document.getElementById("assignmentStudent").disabled = true;
+  document.getElementById("assignmentSubject").value = assignment.subject;
+  document.getElementById("assignmentTitle").value = assignment.title;
+  document.getElementById("assignmentDescription").value = assignment.description || "";
+  document.getElementById("assignmentDueDate").value = assignment.due_date;
+  document.getElementById("assignmentFormTitle").textContent = "Edit Assignment";
+  document.getElementById("saveAssignment").textContent = "Save assignment changes";
+  document.getElementById("cancelAssignmentEdit").classList.remove("hidden");
+}
+
+
+function resetAssignmentForm() {
+
+  editingAssignmentId = null;
+  document.getElementById("assignmentStudent").disabled = false;
+  document.getElementById("assignmentSubject").value = "";
+  document.getElementById("assignmentTitle").value = "";
+  document.getElementById("assignmentDescription").value = "";
+  document.getElementById("assignmentDueDate").value = todayIsoDate();
+  document.getElementById("assignmentFormTitle").textContent = "Upload Assignment";
+  document.getElementById("saveAssignment").textContent = "Upload assignment";
+  document.getElementById("cancelAssignmentEdit").classList.add("hidden");
+}
+
+
+function renderRegister() {
+
+  const bodyEl = document.getElementById("registerBody");
+
+  if (classStudents.length === 0) {
+    bodyEl.innerHTML = '<div class="empty">No students found.</div>';
+    return;
+  }
+
+  bodyEl.innerHTML = classStudents.map(student => {
+
+    const status = register[student.id];
+
+    return `
+      <div class="register-row">
+        <div class="student-name">
+          ${escapeHtml(student.name)}
+          ${student.has_parent
+            ? '<div class="sub">Parent: ' + escapeHtml(student.parent_name) + ' · ' + escapeHtml(student.parent_email) + '</div>'
+            : '<span class="no-parent">no parent linked</span>'}
+        </div>
+        <div class="toggle">
+          <button class="${status === "Present" ? "on-present" : ""}"
+                  onclick="setStatus(${student.id}, 'Present')">Present</button>
+          <button class="${status === "Absent" ? "on-absent" : ""}"
+                  onclick="setStatus(${student.id}, 'Absent')">Absent</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+
+function setStatus(studentId, status) {
+  register[studentId] = status;
+  renderRegister();
+}
+
+
+async function saveAttendance() {
+
+  const attendanceDate = document.getElementById("attendanceDate").value;
+
+  if (!attendanceDate) {
+    showToast("Pick a date first");
+    return;
+  }
+
+  const records = classStudents.map(student => ({
+    student_id: student.id,
+    status: register[student.id]
+  }));
+
+  try {
+    const result = await api("/api/attendance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date: attendanceDate, records: records })
+    });
+
+    if (result.changed === 0) {
+      showToast("No changes to save");
+    } else {
+      showToast(
+        result.changed + " updated · " +
+        result.notifications_sent + " parent notification(s) sent"
+      );
+    }
+
+    loadNotifications();
+
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function saveMarks() {
+
+  const studentId = document.getElementById("markStudent").value;
+  const subject = document.getElementById("markSubject").value.trim();
+  const scored = document.getElementById("markScored").value;
+  const total = document.getElementById("markTotal").value;
+  const markDate = document.getElementById("markDate").value;
+
+  if (!studentId || !subject || scored === "" || total === "" || !markDate) {
+    showToast("Fill in every field");
+    return;
+  }
+
+  try {
+    const result = await api("/api/grades", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        student_id: parseInt(studentId, 10),
+        subject: subject,
+        marks: parseFloat(scored),
+        total_marks: parseFloat(total),
+        date: markDate
+      })
+    });
+
+    addRecentMark(result);
+
+    showToast(
+      result.changed
+        ? (result.notifications_sent > 0 ? "Marks updated · parent notified" : "Marks updated")
+        : "No changes to save"
+    );
+
+    document.getElementById("markScored").value = "";
+    document.getElementById("markSubject").value = "";
+    document.getElementById("markDate").value = todayIsoDate();
+    document.getElementById("saveMarks").textContent = "Save marks";
+    loadNotifications();
+
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+function addRecentMark(result) {
+
+  const student = classStudents.find(s => s.id === result.student_id);
+  const tbody = document.getElementById("recentMarks");
+
+  if (tbody.querySelector("td[colspan]")) {
+    tbody.innerHTML = "";
+  }
+
+  const existingRow = tbody.querySelector(
+    `tr[data-grade-key="${result.student_id}|${result.subject}|${result.date}"]`
+  );
+
+  if (existingRow) {
+    existingRow.remove();
+  }
+
+  const row = document.createElement("tr");
+  row.dataset.gradeKey = result.student_id + "|" + result.subject + "|" + result.date;
+
+  row.innerHTML = `
+    <td>${escapeHtml(student ? student.name : result.student_id)}</td>
+    <td>${escapeHtml(result.subject)}</td>
+    <td class="num">${result.marks} / ${result.total_marks}</td>
+    <td class="num">${percentText(result.percentage)}</td>
+    <td><span class="tag ${result.notifications_sent > 0 ? "good" : "neutral"}">
+      ${result.notifications_sent > 0 ? "Notified" : result.changed ? "Updated" : "No change"}
+    </span></td>
+    <td><button class="link" onclick='editGrade(${JSON.stringify({
+      student_id: result.student_id,
+      subject: result.subject,
+      marks: result.marks,
+      total_marks: result.total_marks,
+      date: result.date
+    })})'>Edit</button></td>
+  `;
+
+  tbody.prepend(row);
+}
+
+
+function editGrade(grade) {
+
+  document.querySelector('[data-view="classwork"]').click();
+  document.querySelector('[data-panel="marks"]').click();
+
+  document.getElementById("markStudent").value = String(grade.student_id);
+  document.getElementById("markSubject").value = grade.subject;
+  document.getElementById("markScored").value = grade.marks;
+  document.getElementById("markTotal").value = grade.total_marks;
+  document.getElementById("markDate").value = grade.date;
+  document.getElementById("saveMarks").textContent = "Update marks";
+  document.getElementById("markScored").focus();
+}
+
+
+// ---------------------------------------------------------------- wiring
+
+
+document.querySelectorAll(".nav button").forEach(button => {
+  button.addEventListener("click", () => {
+
+    const view = button.dataset.view;
+
+    if (view === "classwork") {
+      const canUseClass = me && (
+        me.capabilities.includes("record_attendance") ||
+        me.capabilities.includes("record_grades") ||
+        me.capabilities.includes("record_transportation") ||
+        me.capabilities.includes("record_assignments") ||
+        me.capabilities.includes("record_admissions") ||
+        me.capabilities.includes("record_events") ||
+        me.capabilities.includes("record_fees")
+      );
+
+      if (!canUseClass) {
+        return;
+      }
+    }
+
+    document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+    button.classList.add("active");
+
+    document.getElementById("dashboardView").classList.toggle("hidden", view !== "dashboard");
+    document.getElementById("notificationsView").classList.toggle("hidden", view !== "notifications");
+    document.getElementById("reportsView").classList.toggle("hidden", view !== "reports");
+    document.getElementById("classworkView").classList.toggle("hidden", view !== "classwork");
+    document.getElementById("adminNotificationsView").classList.toggle("hidden", true);
+    document.getElementById("notificationSubnav").classList.toggle("hidden", view !== "notifications");
+
+    if (view === "dashboard") {
+      loadDashboardStats();
+    }
+  });
+});
+
+
+document.querySelectorAll("#notificationSubnav button").forEach(button => {
+  button.addEventListener("click", () => {
+
+    document.querySelectorAll("#notificationSubnav button").forEach(item => item.classList.remove("active"));
+    button.classList.add("active");
+
+    const subview = button.dataset.notificationView;
+    const isAdminSubview = subview === "create" || subview === "history";
+
+    document.getElementById("notificationsView").classList.toggle("hidden", isAdminSubview);
+    document.getElementById("adminNotificationsView").classList.toggle("hidden", !isAdminSubview);
+
+    if (subview === "create") {
+      document.getElementById("adminCreator").classList.remove("hidden");
+      document.getElementById("adminTitle").focus();
+    } else if (subview === "history") {
+      document.getElementById("adminCreator").classList.add("hidden");
+      loadAdminNotifications();
+      loadNotificationRules();
+    }
+  });
+});
+
+
+async function loadDashboardStats() {
+
+  document.getElementById("dashboardUnread").textContent = notifications.filter(item => !item.is_read).length;
+  document.getElementById("dashboardReports").textContent = reportCatalogue.length;
+
+  if (me.capabilities.includes("manage_notifications")) {
+    const result = await api("/api/admin/notifications/users");
+    document.getElementById("dashboardUsers").textContent = result.users.length;
+  } else {
+    document.getElementById("dashboardUsers").textContent = "—";
+  }
+
+  if (!me.capabilities.includes("record_transportation")) {
+    await loadParentTransportation();
+  }
+}
+
+
+async function loadParentTransportation() {
+
+  const panel = document.getElementById("parentTransportPanel");
+  const body = document.getElementById("parentTransportBody");
+  const date = todayIsoDate();
+
+  try {
+    const result = await api("/api/my-transportation?date=" + date);
+
+    if (result.children.length === 0) {
+      return;
+    }
+
+    document.getElementById("parentTransportDate").textContent = date;
+    body.innerHTML = result.children.map(child => `
+      <div class="register-row">
+        <div class="student-name">${escapeHtml(child.student_name)}</div>
+        <span class="tag ${child.status === "Not Boarded" ? "bad" : child.status === "Destination Reached" ? "good" : "neutral"}">
+          ${escapeHtml(child.status)}
+        </span>
+      </div>
+    `).join("");
+    panel.classList.remove("hidden");
+  } catch (error) {
+    panel.classList.add("hidden");
+  }
+}
+
+document.querySelectorAll("#classPills button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("#classPills button").forEach(b => b.classList.remove("active"));
+    button.classList.add("active");
+
+    const isMarks = button.dataset.panel === "marks";
+    const isTransport = button.dataset.panel === "transport";
+    const isAssignments = button.dataset.panel === "assignments";
+    const isAdmissions = button.dataset.panel === "admissions";
+    const isEvents = button.dataset.panel === "events";
+    const isFees = button.dataset.panel === "fees";
+
+    document.getElementById("attendancePanel").classList.toggle("hidden", isMarks || isTransport || isAssignments || isAdmissions || isEvents || isFees);
+    document.getElementById("marksPanel").classList.toggle("hidden", !isMarks);
+    document.getElementById("transportPanel").classList.toggle("hidden", !isTransport);
+    document.getElementById("assignmentsPanel").classList.toggle("hidden", !isAssignments);
+    document.getElementById("admissionsPanel").classList.toggle("hidden", !isAdmissions);
+    document.getElementById("eventsPanel").classList.toggle("hidden", !isEvents);
+    document.getElementById("feesPanel").classList.toggle("hidden", !isFees);
+
+    if (isTransport) {
+      loadTransportation();
+    }
+
+    if (isAssignments) {
+      loadAssignmentList();
+    }
+  });
+});
+
+document.getElementById("attendanceDate").addEventListener("change", loadRegister);
+document.getElementById("transportDate").addEventListener("change", loadTransportation);
+document.getElementById("saveAttendance").addEventListener("click", saveAttendance);
+document.getElementById("saveTransportation").addEventListener("click", saveTransportation);
+document.getElementById("saveMarks").addEventListener("click", saveMarks);
+document.getElementById("saveAssignment").addEventListener("click", saveAssignment);
+document.getElementById("cancelAssignmentEdit").addEventListener("click", resetAssignmentForm);
+document.getElementById("saveAdmission").addEventListener("click", saveAdmission);
+document.getElementById("saveEvent").addEventListener("click", saveEvent);
+document.getElementById("saveFee").addEventListener("click", saveFee);
+
+document.getElementById("markAllPresent").addEventListener("click", () => {
+  classStudents.forEach(student => {
+    register[student.id] = "Present";
+  });
+  renderRegister();
+});
+
+document.querySelectorAll("#readFilter button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("#readFilter button").forEach(b => b.classList.remove("active"));
+    button.classList.add("active");
+    readFilter = button.dataset.filter;
+    renderNotifications();
+  });
+});
+
+document.getElementById("studentFilter").addEventListener("change", (changeEvent) => {
+  studentFilter = changeEvent.target.value;
+  loadReport();
+});
+
+document.getElementById("reportDate").addEventListener("change", (changeEvent) => {
+  reportDate = changeEvent.target.value;
+  loadReport();
+});
+
+document.getElementById("adminRecipientScope").addEventListener("change", (changeEvent) => {
+  renderAdminRecipients(changeEvent.target.value);
+});
+
+document.getElementById("enablePushNotifications").addEventListener(
+  "click", enablePushNotifications
+);
+
+document.getElementById("adminSendOption").addEventListener("change", (changeEvent) => {
+  document.getElementById("scheduleRow").classList.toggle("hidden", changeEvent.target.value !== "schedule");
+});
+
+document.getElementById("adminNotificationHistory").addEventListener("click", (clickEvent) => {
+  const detailButton = clickEvent.target.closest("[data-admin-detail]");
+  const deleteButton = clickEvent.target.closest("[data-admin-delete]");
+
+  if (detailButton) {
+    showAdminNotificationDetails(detailButton.dataset.adminDetail);
+  } else if (deleteButton) {
+    deleteAdminNotification(deleteButton.dataset.adminDelete);
+  }
+});
+
+document.getElementById("notificationRulesBody").addEventListener("click", (clickEvent) => {
+  const saveButton = clickEvent.target.closest("[data-rule-save]");
+  if (saveButton) {
+    saveNotificationRule(saveButton.dataset.ruleSave);
+  }
+});
+
+document.getElementById("openAdminCreate").addEventListener("click", () => {
+  document.getElementById("adminCreator").classList.remove("hidden");
+  document.getElementById("adminTitle").focus();
+});
+
+document.getElementById("cancelAdminCreate").addEventListener("click", () => {
+  document.getElementById("adminCreator").classList.add("hidden");
+});
+
+document.getElementById("sendAdminNotification").addEventListener("click", sendAdminNotification);
+document.getElementById("refreshAdminNotifications").addEventListener("click", loadAdminNotifications);
+
+document.getElementById("dashboardNotifications").addEventListener("click", () => {
+  document.querySelector('[data-view="notifications"]').click();
+});
+
+document.getElementById("dashboardReportsButton").addEventListener("click", () => {
+  document.querySelector('[data-view="reports"]').click();
+});
+
+const dashboardClassButton = document.getElementById("dashboardClass");
+if (dashboardClassButton) {
+  dashboardClassButton.addEventListener("click", () => {
+    const classTab = document.querySelector('[data-view="classwork"]');
+    if (classTab) {
+      classTab.click();
+    }
+  });
+}
+
+document.getElementById("refreshNotifications").addEventListener("click", loadNotifications);
+
+document.getElementById("runReminders").addEventListener("click", async () => {
+
+  try {
+    const results = await api("/api/reminders/run", { method: "POST" });
+    const due = results.assignment_due;
+
+    if (due.reminders_sent > 0) {
+      showToast(due.reminders_sent + " reminder(s) sent for " + due.target_date);
+    } else if (due.already_sent > 0) {
+      showToast("Already sent today (" + due.already_sent + " skipped)");
+    } else {
+      showToast("Nothing due on " + due.target_date);
+    }
+
+    loadNotifications();
+
+  } catch (error) {
+    showToast(error.message);
+  }
+});
+document.getElementById("submitCreate").addEventListener("click", createNotification);
+document.getElementById("clearAllNotifications").addEventListener("click", clearAllNotifications);
+
+document.getElementById("toggleCreate").addEventListener("click", () => {
+  document.getElementById("creator").classList.toggle("hidden");
+});
+
+document.getElementById("cancelCreate").addEventListener("click", () => {
+  document.getElementById("creator").classList.add("hidden");
+});
+
+document.getElementById("logout").addEventListener("click", async () => {
+  // Drop this browser's push subscription first, otherwise whoever logs in
+  // next on the same device would keep receiving this account's pushes.
+  await unsubscribeCurrentPush();
+  await fetch("/api/logout", { method: "POST" });
+  window.location.href = "/login";
+});
+
+
+// Pick up notifications created elsewhere while the page is open
+setInterval(() => {
+  if (me) loadNotifications();
+}, 15000);
+
+
+async function start() {
+
+  try {
+    await loadMe();
+  } catch (error) {
+    return;
+  }
+
+  await updateServiceWorker();
+
+  await loadNotifications();
+  await loadReportCatalogue();
+
+  if (me.capabilities.includes("manage_notifications")) {
+    await loadAdminNotificationUsers();
+    await loadAdminNotifications();
+    await loadNotificationRules();
+  }
+
+  const canRecord =
+    me.capabilities.includes("record_attendance") ||
+    me.capabilities.includes("record_grades") ||
+    me.capabilities.includes("record_transportation") ||
+    me.capabilities.includes("record_assignments") ||
+    me.capabilities.includes("record_admissions") ||
+    me.capabilities.includes("record_events") ||
+    me.capabilities.includes("record_fees");
+
+  if (document.getElementById("dashboardClass")) {
+    document.getElementById("dashboardClass").classList.toggle("hidden", !canRecord);
+  }
+  if (document.getElementById("classTab")) {
+    document.getElementById("classTab").classList.toggle("hidden", !canRecord);
+  }
+  await loadDashboardStats();
+
+  if (canRecord) {
+    const today = todayIsoDate();
+    document.getElementById("attendanceDate").value = today;
+    document.getElementById("markDate").value = today;
+    document.getElementById("transportDate").value = today;
+
+    await loadClassStudents();
+
+    if (me.capabilities.includes("record_attendance")) {
+      await loadRegister();
+    } else if (me.capabilities.includes("record_grades")) {
+      document.querySelector('[data-panel="marks"]').click();
+    } else if (me.capabilities.includes("record_assignments")) {
+      document.querySelector('[data-panel="assignments"]').click();
+    } else if (me.capabilities.includes("record_events")) {
+      document.querySelector('[data-panel="events"]').click();
+    }
+  }
+}
+
+start();
+</script>
+</body>
+</html>

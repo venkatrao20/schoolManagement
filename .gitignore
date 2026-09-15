@@ -1,0 +1,36 @@
+# Dependencies
+**/node_modules/
+**/.venv/
+**/venv/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local databases and generated runtime data
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+**/uploads/*
+!**/uploads/.gitkeep
+
+# Build and test output
+**/dist/
+**/build/
+**/coverage/
+**/__pycache__/
+*.py[cod]
+
+# Logs and local tooling
+*.log
+*.cookies
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store

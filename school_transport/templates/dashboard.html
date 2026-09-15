@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - SchoolSafe{% endblock %}
+
+{% block content %}
+<style>
+    .admin-greeting {
+        background: linear-gradient(135deg, #2F6F5E 0%, #12172B 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    }
+    .admin-greeting h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+    }
+    .admin-greeting p {
+        margin: 0;
+        color: #E3EFE9;
+    }
+    .summary-section {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        margin-bottom: 24px;
+    }
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+        margin-top: 16px;
+    }
+    .summary-card {
+        text-align: center;
+        padding: 16px;
+        border-radius: 10px;
+        background: #FFFDF8;
+    }
+    .summary-card.completed { background: #DCEFE3; }
+    .summary-card.at_school { background: #E3EFE9; }
+    .summary-card.not_travelling { background: #EFE7D6; }
+    .summary-card.not_boarded { background: #F6E4E0; }
+    .summary-card.pending { background: #FBECD2; }
+    .summary-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    .summary-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #12172B;
+    }
+    .safety-summary h3 {
+        margin-top: 0;
+        color: #12172B;
+    }
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .metric-card {
+        background: linear-gradient(135deg, rgba(29, 78, 216, 0.1), rgba(29, 78, 216, 0.05));
+        border-left: 4px solid #2F6F5E;
+        padding: 16px;
+        border-radius: 10px;
+    }
+    .metric-card span {
+        display: block;
+        font-size: 0.85rem;
+        color: #8B8477;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .metric-card strong {
+        font-size: 1.8rem;
+        color: #2F6F5E;
+    }
+    .attention-section {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        margin-bottom: 24px;
+        border-left: 4px solid #B8863B;
+    }
+    .attention-section h3 {
+        margin-top: 0;
+        color: #8A5A12;
+    }
+    .attention-item {
+        display: grid;
+        grid-template-columns: 1fr 150px 150px;
+        gap: 16px;
+        padding: 12px 0;
+        border-bottom: 1px solid #E7DDC5;
+        align-items: center;
+    }
+    .attention-item:last-child { border-bottom: none; }
+    .student-info { color: #12172B; font-weight: 600; }
+    .parent-info { color: #8B8477; font-size: 0.9rem; }
+    .reason-badge {
+        background: #FBECD2;
+        color: #8A5A12;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+    }
+    .activity-section {
+        background: #FFFDF8;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    .activity-item {
+        display: grid;
+        grid-template-columns: 120px 2fr 1fr 1fr;
+        gap: 16px;
+        padding: 12px 0;
+        border-bottom: 1px solid #E7DDC5;
+        align-items: center;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-time { font-weight: 700; color: #2F6F5E; }
+    .activity-student { color: #12172B; font-weight: 600; }
+    .activity-action { color: #8B8477; font-size: 0.9rem; }
+    @media (max-width: 1024px) {
+        .summary-grid { grid-template-columns: repeat(2, 1fr); }
+        .attention-item, .activity-item { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="admin-greeting">
+    <h1>Good {{ 'Morning' if now.hour < 12 else 'Afternoon' }}, Admin!</h1>
+    <p>School Transport & Student Safety Management System</p>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card"><span>Total Students</span><strong>{{ metrics.total_students }}</strong></div>
+    <div class="metric-card"><span>Total Vehicles</span><strong>{{ metrics.total_vehicles }}</strong></div>
+    <div class="metric-card"><span>Total Drivers</span><strong>{{ metrics.total_drivers }}</strong></div>
+    <div class="metric-card"><span>Total Routes</span><strong>{{ metrics.total_routes }}</strong></div>
+</div>
+
+<div class="summary-section">
+    <div class="safety-summary">
+        <h3>🛡️ Student Safety Today</h3>
+        <p style="color: #8B8477; margin: 8px 0;">Current status distribution of all {{ safety_summary.total_students }} students:</p>
+        <div class="summary-grid">
+            <div class="summary-card completed">
+                <div class="summary-value">{{ safety_summary.completed }}</div>
+                <div class="summary-label">✅ Completed Journey</div>
+            </div>
+            <div class="summary-card at_school">
+                <div class="summary-value">{{ safety_summary.at_school }}</div>
+                <div class="summary-label">📚 At School</div>
+            </div>
+            <div class="summary-card not_travelling">
+                <div class="summary-value">{{ safety_summary.not_travelling }}</div>
+                <div class="summary-label">🚫 Not Travelling</div>
+            </div>
+            <div class="summary-card not_boarded">
+                <div class="summary-value">{{ safety_summary.not_boarded }}</div>
+                <div class="summary-label">⚠️ Not Boarded</div>
+            </div>
+            <div class="summary-card pending">
+                <div class="summary-value">{{ safety_summary.pending }}</div>
+                <div class="summary-label">⏳ Pending</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+    <div class="summary-section">
+        <h3 style="margin-top: 0;">📊 Today's Movements</h3>
+        <div style="display: grid; gap: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="background: #E3EFE9; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.6rem; font-weight: 700; color: #256844;">{{ metrics.boarded_today }}</div>
+                    <div style="font-size: 0.9rem; color: #256844;">Boarded</div>
+                </div>
+                <div style="background: #E3EFE9; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.6rem; font-weight: 700; color: #1B2140;">{{ metrics.entered_today }}</div>
+                    <div style="font-size: 0.9rem; color: #1B2140;">School Entry</div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="background: #F3E1E8; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.6rem; font-weight: 700; color: #7A2E4A;">{{ metrics.exited_today }}</div>
+                    <div style="font-size: 0.9rem; color: #7A2E4A;">School Exit</div>
+                </div>
+                <div style="background: #DCEFE3; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.6rem; font-weight: 700; color: #1B2140;">{{ metrics.dropped_today }}</div>
+                    <div style="font-size: 0.9rem; color: #1B2140;">Dropped Off</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-section">
+        <h3 style="margin-top: 0;">📈 System Overview</h3>
+        <div style="display: grid; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #FFFDF8; border-radius: 8px;">
+                <span>System Status</span>
+                <span style="background: #DCEFE3; color: #256844; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.85rem;">✓ Active</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #FFFDF8; border-radius: 8px;">
+                <span>Vehicles in Service</span>
+                <strong style="color: #2F6F5E;">{{ metrics.total_vehicles }}/{{ metrics.total_vehicles }}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #FFFDF8; border-radius: 8px;">
+                <span>Drivers On Duty</span>
+                <strong style="color: #2F6F5E;">{{ metrics.total_drivers }}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #FFFDF8; border-radius: 8px;">
+                <span>Routes Operational</span>
+                <strong style="color: #2F6F5E;">{{ metrics.total_routes }}</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not_travelling_records %}
+<div class="attention-section">
+    <h3>⚠️ Attention Required - Not Travelling Today</h3>
+    <p style="color: #8B8477; margin: 8px 0;">Students marked as not travelling today ({{ not_travelling_records|length }})</p>
+    {% for record in not_travelling_records %}
+    <div class="attention-item">
+        <div>
+            <div class="student-info">{{ record.student_name }}</div>
+            <div class="parent-info">Parent: {{ record.parent_name }}</div>
+        </div>
+        <div>
+            <span class="reason-badge">{{ record.reason or 'No reason' }}</span>
+        </div>
+        <div style="font-size: 0.9rem; color: #8B8477;">{{ record.recorded_date }} {{ record.recorded_time }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="activity-section">
+    <h3 style="margin-top: 0;">📋 Recent Activity</h3>
+    {% if recent_records %}
+    {% for record in recent_records %}
+    <div class="activity-item">
+        <div class="activity-time">{{ record.movement_time|time12 }}</div>
+        <div class="activity-student">{{ record.student_name }}</div>
+        <div class="activity-action">
+            {% if record.movement_type == 'boarding' %}
+                🚌 Boarded
+            {% elif record.movement_type == 'drop_off' %}
+                🏠 Dropped Off
+            {% elif record.movement_type == 'school_entry' %}
+                📚 School Entry
+            {% elif record.movement_type == 'school_exit' %}
+                🚪 School Exit
+            {% else %}
+                {{ record.movement_type }}
+            {% endif %}
+        </div>
+        <div style="color: #8B8477; font-size: 0.9rem;">By {{ record.recorded_by }}</div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="padding: 20px; text-align: center; color: #A2A8C4;">
+        No movement records yet.
+    </div>
+    {% endif %}
+</div>
+
+
+<div class="summary-section" style="margin-top:24px;">
+  <h3 style="margin-top:0;">🛡️ Transport Compliance</h3>
+  {% if vehicle_expiry_alerts or driver_expiry_alerts %}
+    <div style="display:grid;gap:8px;">
+      {% for alert in vehicle_expiry_alerts %}<div style="padding:10px;background:#FBECD2;border-radius:8px;">🚐 <strong>{{ alert.vehicle_number }}</strong> — {{ alert.document }}: {{ alert.label }} ({{ alert.expiry }})</div>{% endfor %}
+      {% for alert in driver_expiry_alerts %}<div style="padding:10px;background:#FBECD2;border-radius:8px;">👨‍✈️ <strong>{{ alert.driver_name }}</strong> — Licence: {{ alert.label }} ({{ alert.expiry }})</div>{% endfor %}
+    </div>
+  {% else %}<p style="color:#8B8477;margin-bottom:0;">No vehicle or driver compliance alerts.</p>{% endif %}
+</div>
+
+{% endblock %}

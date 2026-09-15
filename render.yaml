@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: school-management-hub
+    name: school-fee-frontend
     runtime: static
     rootDir: hub
     buildCommand: echo "Static hub ready"
